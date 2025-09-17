@@ -171,36 +171,40 @@
       const res = await fetch(API_URL + encodeURIComponent(fullCode13), {method:'GET', credentials:'same-origin'});
       const data = await res.json();
 
-        if (data && data.ok && !data.not_found && data.product_name){
+     
+      if (data && data.ok && !data.not_found && data.product_name){
+        // เพิ่มข้อความสุดท้าย: พบสินค้าแล้ว
+        setTimeout(()=>{
           setMsg('พบสินค้าแล้ว: ' + data.product_name, true);
+        }, 2000);
 
-          // ส่ง product + (user ถ้ามี) ไปยังหน้าแบบฟอร์มผ่าน ?ecp=
+        // เก็บ session + redirect
+        setTimeout(()=>{
           const payload = {
-            product: {
-              product_name:  data.product_name,
-              category_base: data.category_base || '',
-              system:        data.system || '',
-              category:      data.category || ''
-            },
-            ...(ecUser ? { user: ecUser } : {})
+            product_name:  data.product_name,
+            category_base: data.category_base || '',
+            system:        data.system || '',
+            category:      data.category || ''
           };
-
-          const ecp = b64urlEncodeJson(payload);
-          const url = new URL(REGISTER_URL);
-          url.searchParams.set('ecp', ecp);
-
-          // เผื่อหน้า Elementor ช้าหน่อย ค่อยนำทาง
-          setTimeout(()=>{ location.href = url.toString(); }, 500);
-        }else{
-          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขอีกครั้ง หรือกด"ข้าม"เพื่อกรอกข้อมูลสินค้าเอง', false);
+          sessionStorage.setItem('ecProduct', JSON.stringify(payload));
+          window.location.href = REGISTER_URL;
+        }, 4000);
+      }else{
+        // ถ้าไม่พบ
+        setTimeout(()=>{
+          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขบาร์โค้ดใหม่อีกครั้ง หรือกด"ข้าม"เพื่อกรอกข้อมูลสินค้าเอง' , false);
           btnOk.disabled = false;
-        }
-      }catch(e){
-        console.error(e);
-        setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”', false);
-        btnOk.disabled = false;
+        }, 3000);
       }
-    });
+    }catch(e){
+      console.error(e);
+      setTimeout(()=>{
+        setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกดข้าม', false);
+        btnOk.disabled = false;
+      }, 3000);
+    }
+  });
+
 
     btnSkip.addEventListener('click', ()=>{
       // ไม่มี product แต่ถ้ามี user ก็ส่งไปให้พรีฟิลชื่อ/อีเมล
