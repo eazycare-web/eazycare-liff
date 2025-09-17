@@ -1,4 +1,25 @@
-<!-- sso.html: ใช้ตัวเดิมของคุณ + เพิ่ม timeout -->
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>EazyCare | กำลังเข้าสู่ระบบ…</title>
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body{font:15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto; color:#111; margin:0; background:#fff;}
+    #sso-wrap{max-width:520px;margin:40px auto;padding:0 14px;text-align:center}
+    .muted{color:#6b7280}
+  </style>
+</head>
+<body>
+  <div id="sso-wrap">
+    <h3>กำลังเข้าสู่ระบบ...</h3>
+    <p id="sso-msg" class="muted">โปรดรอสักครู่</p>
+  </div>
+
+ <!-- sso.html: ใช้ตัวเดิมของคุณ + เพิ่ม timeout -->
 <script>
 (async function(){
   'use strict';
@@ -49,3 +70,6 @@
   }
 })();
 </script>
+
+</body>
+</html>
