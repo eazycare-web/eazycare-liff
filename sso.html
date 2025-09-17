@@ -30,66 +30,55 @@
     <button id="fallback" class="btn" style="display:none">แตะเพื่อเข้าสู่ระบบอีกครั้ง</button>
   </div>
 
-  <script>
-  (async function(){
-    'use strict';
+<!-- แก้เฉพาะบรรทัดที่จำเป็น -->
+<script>
+(async function(){
+  'use strict';
 
-    // ====== ปรับค่าตามของคุณ ======
-    const LIFF_ID      = '2008100293-QNl6ParD';
-    const BRIDGE_URL   = 'https://www.eazycare.in.th/wp-admin/admin-post.php?action=ec_liff_sso'; // admin-post bridge (POST)
-    const REDIRECT_URL = 'https://www.eazycare.in.th/check-warranty/'; // WP ปลายทางหลังล็อกอินสำเร็จ
+  const LIFF_ID = '2008100293-QNl6ParD';
 
-    const $ = s => document.querySelector(s);
-    const say = t => $('#msg').textContent = t;
+  // ส่งพาธ ไม่ส่ง full URL เพื่อกันโดน sanitize ทิ้ง
+  const REDIRECT_PATH = '/check-warranty/';
+  const BRIDGE_URL    = 'https://www.eazycare.in.th/wp-admin/admin-post.php?action=ec_liff_sso';
 
-    // แสดงปุ่มสำรองถ้าช้ากว่า 5s (บางเครื่อง iOS liFF init ช้าจริง)
-    const slowTimer = setTimeout(()=>{
-      $('#fallback').style.display = 'inline-block';
-      say('ช้ากว่าปกติ... แตะปุ่มด้านล่างเพื่อลองอีกครั้ง');
-    }, 5000);
+  const $ = s => document.querySelector(s);
+  const say = t => ($('#msg').textContent = t);
 
-    $('#fallback').onclick = () => {
-      try { liff.login({ redirectUri: location.href }); } catch(_) { location.reload(); }
-    };
+  const slowTimer = setTimeout(()=>{ $('#fallback').style.display='inline-block'; say('ช้ากว่าปกติ... แตะปุ่มเพื่อลองใหม่'); }, 5000);
+  $('#fallback').onclick = () => { try { liff.login({ redirectUri: location.href }); } catch(_) { location.reload(); } };
 
-    try{
-      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-    }catch(e){
-      clearTimeout(slowTimer);
-      say('เริ่ม LIFF ไม่สำเร็จ'); return;
-    }
+  try { await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true }); }
+  catch(e){ clearTimeout(slowTimer); say('เริ่ม LIFF ไม่สำเร็จ'); return; }
 
-    if (!liff.isLoggedIn()) { 
-      // กลับมาหน้านี้หลัง login แล้วจะเร็วขึ้น
-      liff.login({ redirectUri: location.href }); 
-      return; 
-    }
+  if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
 
-    const idToken = liff.getIDToken();
-    if (!idToken){ clearTimeout(slowTimer); say('ไม่พบ id_token (ตรวจ scope openid)'); return; }
+  const idToken = liff.getIDToken();
+  if (!idToken){ clearTimeout(slowTimer); say('ไม่พบ id_token (ตรวจ scope openid)'); return; }
 
-    // ส่ง POST ตรงไปยัง WP Bridge (ไม่ต้อง fetch/CORS) และให้นำทางออกไปเลย
-    say('กำลังเข้าสู่ระบบที่เว็บไซต์...');
-    const form = document.createElement('form');
-    form.method  = 'POST';
-    form.action  = BRIDGE_URL;
-    form.target  = '_top'; // ให้ขึ้น top-level เสมอ
-    form.style.display = 'none';
+  say('กำลังเข้าสู่ระบบที่เว็บไซต์...');
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = BRIDGE_URL;
+  form.target = '_top';
+  form.style.display = 'none';
 
-    const f1 = document.createElement('input');
-    f1.name = 'id_token';
-    f1.value = idToken;
-    form.appendChild(f1);
+  const f1 = document.createElement('input');
+  f1.type = 'hidden';
+  f1.name = 'id_token';
+  f1.value = idToken;
+  form.appendChild(f1);
 
-    const f2 = document.createElement('input');
-    f2.name = 'redirect';
-    f2.value = REDIRECT_URL;
-    form.appendChild(f2);
+  const f2 = document.createElement('input');
+  f2.type = 'hidden';
+  f2.name = 'redirect';
+  f2.value = REDIRECT_PATH;   // << ส่งเฉพาะพาธ
+  form.appendChild(f2);
 
-    document.body.appendChild(form);
-    clearTimeout(slowTimer);
-    form.submit();
-  })();
-  </script>
+  document.body.appendChild(form);
+  clearTimeout(slowTimer);
+  form.submit();
+})();
+</script>
+
 </body>
 </html>
