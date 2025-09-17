@@ -7,107 +7,37 @@
 
   <!-- ฟอนต์ Prompt -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- NEW: LIFF SDK เพื่อดึงชื่อ/อีเมลจาก LINE -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
-    :root{ 
-      --brand:#91C65E; 
-      --brand-dark:#7DB14F; 
-      --ink:#0f172a; 
-      --muted:#6b7280; 
-      --card:#ffffff; 
-    }
-
+    :root{ --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      background:#fff;
-      color:var(--ink);
-    }
+    html, body {height: 100%;margin: 0;overflow-x: hidden;display: flex;flex-direction: column;background:#fff;color:var(--ink);}
+    main {flex: 1;display: flex;justify-content: center;align-items: flex-start;padding: 10px;}
+    .wrap {width: 100%;max-width: 720px;}
+    .logo {width:100px;max-width:30%;margin:0 auto 0;height:auto;display:block;padding:30px 0 0 0;}
 
-    main {
-      flex: 1; /* ดัน footer ลงล่าง */
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 10px;
-    }
-
-    .wrap {
-      width: 100%;
-      max-width: 720px;
-    }
-    .logo {width:100px;max-width:30%;margin:0 auto 0px;height:auto;display:block;padding:30px 0px 0px 0px;}
-
-    /* ===== hero ===== */
+    /* hero */
     .hero{text-align:center;margin-bottom:20px}
     .header{font-size:26px;font-weight:500;color:#91C65E;margin:10px 0 0;text-align:center;}
-    .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 0px;text-align:center;}
+    .subtext{font-size:15px;font-weight:500;color:#666;margin:0;text-align:center;}
     .hero p.lead{margin:0;color:#666;font-weight:400}
     .hero img{max-width:100%;height:auto;display:block;margin:12px auto}
 
-    /* ===== card ===== */
-    .card{
-      background:var(--card);
-      border-radius:16px;
-      padding:5px;
-      margin-top:10px;
-    }
+    /* card */
+    .card{background:var(--card);border-radius:16px;padding:5px;margin-top:10px;}
     .hint{color:var(--muted);margin:6px 0 12px;text-align:center}
 
-    .bc-group{
-      display:flex;
-      width:100%;
-      max-width:100%;
-    }
-    .bc-prefix,.bc-tail{
-      font-size:16px;
-      line-height:1.2;
-      padding:.78em 1em;
-      border:0px solid #ddd;
-      background:#f9fafb;
-      outline:none;
-      letter-spacing:.14em;
-      flex:1;
-      min-width:0;
-    }
-    .bc-prefix{
-      flex:0 0 55%;
-      max-width:55%;
-      text-align:center;
-      border-right:0;
-      color:#6b7280;
-      background:#f3f4f6;
-      border-radius:50px 0 0 50px;
-      pointer-events:none;
-      user-select:none;
-    }
-    .bc-tail{
-      text-align:center;
-      border-radius:0 50px 50px 0;
-    }
+    .bc-group{display:flex;width:100%;max-width:100%}
+    .bc-prefix,.bc-tail{font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1;min-width:0}
+    .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;border-right:0;color:#6b7280;background:#f3f4f6;border-radius:50px 0 0 50px;pointer-events:none;user-select:none}
+    .bc-tail{text-align:center;border-radius:0 50px 50px 0}
     .bc-tail:focus{border-color:var(--brand);box-shadow:0 0 0 0px rgba(145,198,94,.25)}
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-      margin-top:14px
-    }
-    .btn{
-      font-size:16px;
-      padding:.58em 1.2em;
-      border-radius:10px;
-      border:0;
-      cursor:pointer;
-      flex:1;
-      max-width:100%
-    }
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+    .btn{font-size:16px;padding:.58em 1.2em;border-radius:10px;border:0;cursor:pointer;flex:1;max-width:100%}
     .btn-primary{background:var(--brand);color:#fff}
     .btn-primary:hover{background:var(--brand-dark)}
     .btn-primary:disabled{opacity:.55;cursor:not-allowed}
@@ -115,132 +45,164 @@
     .msg{min-height:1.25em;margin-top:10px;text-align:center}
     .msg.ok{color:#166534}.msg.err{color:#b00020}
 
-    footer{
-      text-align:center;
-      color:#fff;
-      background-color:#91C65E;
-      font-size:12px;
-      padding:12px;
-    }
+    footer{text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
   </style>
 </head>
-<body>   
-<img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
-     alt="EazyCare" class="logo">
-<p class="header">WARRANTY REGISTRATION</p>
-<p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
+<body>
+  <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
+       alt="EazyCare" class="logo">
+  <p class="header">WARRANTY REGISTRATION</p>
+  <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
 
-<main>
-  <div class="wrap">
-    <section class="card" aria-label="ฟอร์มบาร์โค้ด">
-      <section class="hero">
-        <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
-             alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
-        <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
+  <main>
+    <div class="wrap">
+      <section class="card" aria-label="ฟอร์มบาร์โค้ด">
+        <section class="hero">
+          <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
+               alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
+          <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
+        </section>
+
+        <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
+          <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก (อ่านอย่างเดียว)">
+          <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
+        </div>
+
+        <div class="actions">
+          <button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button>
+        </div>
+        <div class="actions">
+          <button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button>
+        </div>
+
+        <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
       </section>
+    </div>
+  </main>
 
-      <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
-        <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก (อ่านอย่างเดียว)">
-        <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
-      </div>
+  <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
-      <div class="actions">
-        <button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button>
-      </div>
-      <div class="actions">
-        <button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button>
-      </div>
+  <script>
+  (async function(){
+    'use strict';
 
-      <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
-    </section>
-  </div>
-</main>
+    /* ===== CONFIG ===== */
+    const LIFF_ID      = '2008100293-1xx32BzA';  // LIFF ของ Barcode (ต้องอนุญาต domain Netlify ไว้ใน LINE Developers)
+    const REGISTER_URL = 'https://www.eazycare.in.th/การรับประกัน/'; // Elementor Form
+    const API_URL      = 'https://www.eazycare.in.th/wp-json/eazycare/v1/product-lookup?code=';
 
-<footer>
-  © 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.
-</footer>
+    const $ = (s,r=document)=>r.querySelector(s);
+    const elPrefix = $('#bc-prefix');
+    const elTail3  = $('#bc-tail');
+    const elMsg    = $('#bc-msg');
+    const btnOk    = $('#btn-ok');
+    const btnSkip  = $('#btn-skip');
 
-<script>
-(function(){
-  const $ = (s,r=document)=>r.querySelector(s);
-  const elPrefix = $('#bc-prefix');
-  const elTail3  = $('#bc-tail');
-  const elMsg    = $('#bc-msg');
-  const btnOk    = $('#btn-ok');
-  const btnSkip  = $('#btn-skip');
+    const BARCODE_PREFIX = elPrefix.value || '8851003738';
+    const onlyDigits = v => (v||'').replace(/\D+/g,'');
+    const setMsg = (t, ok)=>{ elMsg.className='msg ' + (ok?'ok':'err'); elMsg.textContent=t||''; };
 
-  const BARCODE_PREFIX = elPrefix.value || '8851003738';
-  const REGISTER_URL   = 'https://www.eazycare.in.th/การรับประกัน/';
-  const API_URL        = 'https://www.eazycare.in.th/wp-json/eazycare/v1/product-lookup?code=';
+    // NEW: base64url encoder สำหรับส่ง ecp= ข้ามโดเมน
+    function b64urlEncodeJson(obj){
+      try{
+        const json = JSON.stringify(obj);
+        const b64  = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p)));
+        return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      }catch(_){ return ''; }
+    }
 
-  const onlyDigits = v => (v||'').replace(/\D+/g,'');
-  const setMsg = (t, ok) => { elMsg.className = 'msg ' + (ok?'ok':'err'); elMsg.textContent = t||''; };
+    // NEW: พยายามดึงชื่อ/อีเมลจาก LIFF (ถ้าเปิดใน LINE และ app ได้ scope)
+    let ecUser = null;
+    try{
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+      const prof = await liff.getProfile();
+      const dec  = liff.getDecodedIDToken && liff.getDecodedIDToken();
+      ecUser = {
+        lineUserId: prof?.userId || '',
+        name:       prof?.displayName || '',
+        email:      dec?.email || '',   // ต้องเปิด scope email ใน LINE Developers ด้วย
+        phone:      ''
+      };
+    }catch(e){
+      // ถ้าไม่ได้อยู่ใน LINE หรือไม่ได้ให้สิทธิ์ ก็ข้าม — จะส่งเฉพาะ product ไป
+      console.warn('LIFF not available / no email scope', e);
+      ecUser = null;
+    }
 
-  function onInput(){
-    let d = onlyDigits(elTail3.value);
-    if (d.length > 3) d = d.slice(-3);
-    elTail3.value = d;
-    btnOk.disabled = (d.length !== 3);
-    setMsg('', true);
-  }
-  elTail3.addEventListener('input', onInput);
-  elTail3.addEventListener('paste', ()=> requestAnimationFrame(onInput));
-  elTail3.addEventListener('keyup', e => { if (e.key === 'Enter' && !btnOk.disabled) btnOk.click(); });
-  onInput();
+    function onInput(){
+      let d = onlyDigits(elTail3.value);
+      if (d.length > 3) d = d.slice(-3);
+      elTail3.value = d;
+      btnOk.disabled = (d.length !== 3);
+      setMsg('', true);
+    }
+    elTail3.addEventListener('input', onInput);
+    elTail3.addEventListener('paste', ()=> requestAnimationFrame(onInput));
+    elTail3.addEventListener('keyup', e => { if (e.key === 'Enter' && !btnOk.disabled) btnOk.click(); });
+    onInput();
 
-  btnOk.addEventListener('click', async ()=>{
-    const tail3 = onlyDigits(elTail3.value);
-    if (tail3.length !== 3){ setMsg('ต้องกรอกให้ครบ 3 หลัก', false); elTail3.focus(); return; }
+    async function lookup(code13){
+      const res = await fetch(API_URL + encodeURIComponent(code13), {
+        method:'GET', mode:'cors', credentials:'omit', cache:'no-store', referrerPolicy:'no-referrer',
+        headers:{ 'Accept':'application/json' }
+      });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }
 
-    const fullCode13 = BARCODE_PREFIX + tail3;
-    btnOk.disabled = true;
+    btnOk.addEventListener('click', async ()=>{
+      const tail3 = onlyDigits(elTail3.value);
+      if (tail3.length !== 3){ setMsg('ต้องกรอกให้ครบ 3 หลัก', false); elTail3.focus(); return; }
 
-    // --- ขั้นตอนข้อความเรียงลำดับ ---
-    const msgSteps = [
-      { text: 'กำลังตรวจสอบบาร์โค้ด...', delay: 0 },
-      { text: 'กำลังดึงข้อมูลระบบสินค้า...', delay: 2000 },
-      { text: 'กำลังตรวจสอบสินค้า...', delay: 3000 }
-    ];
-    msgSteps.forEach(step=>{
-      setTimeout(()=> setMsg(step.text, true), step.delay);
+      const full13 = BARCODE_PREFIX + tail3;
+      btnOk.disabled = true;
+      setMsg('กำลังตรวจสอบบาร์โค้ด...', true);
+
+      try{
+        const data = await lookup(full13);
+
+        if (data && data.ok && !data.not_found && data.product_name){
+          setMsg('พบสินค้าแล้ว: ' + data.product_name, true);
+
+          // ส่ง product + (user ถ้ามี) ไปยังหน้าแบบฟอร์มผ่าน ?ecp=
+          const payload = {
+            product: {
+              product_name:  data.product_name,
+              category_base: data.category_base || '',
+              system:        data.system || '',
+              category:      data.category || ''
+            },
+            ...(ecUser ? { user: ecUser } : {})
+          };
+
+          const ecp = b64urlEncodeJson(payload);
+          const url = new URL(REGISTER_URL);
+          url.searchParams.set('ecp', ecp);
+
+          // เผื่อหน้า Elementor ช้าหน่อย ค่อยนำทาง
+          setTimeout(()=>{ location.href = url.toString(); }, 500);
+        }else{
+          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขอีกครั้ง', false);
+          btnOk.disabled = false;
+        }
+      }catch(e){
+        console.error(e);
+        setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”', false);
+        btnOk.disabled = false;
+      }
     });
 
-    try{
-      const res = await fetch(API_URL + encodeURIComponent(fullCode13), {method:'GET', credentials:'omit'});
-      const data = await res.json();
-
-      if (data && data.ok && !data.not_found && data.product_name){
-        setTimeout(()=> setMsg('พบสินค้าแล้ว: ' + data.product_name, true), 2000);
-        setTimeout(()=>{
-          const payload = {
-            product_name:  data.product_name,
-            category_base: data.category_base || '',
-            system:        data.system || '',
-            category:      data.category || ''
-          };
-          sessionStorage.setItem('ecProduct', JSON.stringify(payload));
-          window.location.href = REGISTER_URL;
-        }, 4000);
-      }else{
-        setTimeout(()=>{
-          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขบาร์โค้ดใหม่อีกครั้ง หรือกดข้ามหากไม่ทราบเลขบาร์โค้ด', false);
-          btnOk.disabled = false;
-        }, 3000);
+    btnSkip.addEventListener('click', ()=>{
+      // ไม่มี product แต่ถ้ามี user ก็ส่งไปให้พรีฟิลชื่อ/อีเมล
+      const url = new URL(REGISTER_URL);
+      if (ecUser){
+        const ecp = b64urlEncodeJson({ user: ecUser });
+        url.searchParams.set('ecp', ecp);
       }
-    }catch(e){
-      console.error(e);
-      setTimeout(()=>{
-        setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกดข้าม', false);
-        btnOk.disabled = false;
-      }, 3000);
-    }
-  });
-
-  btnSkip.addEventListener('click', ()=>{
-    sessionStorage.removeItem('ecProduct');
-    window.location.href = REGISTER_URL;
-  });
-})();
-</script>
+      location.href = url.toString();
+    });
+  })();
+  </script>
 </body>
 </html>
