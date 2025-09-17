@@ -25,10 +25,15 @@
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
     body {
       margin:0; background:#fff; color:#111;
-      display:flex; align-items:center; justify-content:center;
-      min-height:100vh; padding:20px;
+      display:flex; flex-direction:column;
+      min-height:100vh;
+    }
+    main {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding:20px;
     }
     #wrap {max-width:420px;width:100%;text-align:center}
+    
     .logo {width:120px;margin:0 auto 20px;display:block}
     h3 {font-size:22px;font-weight:600;margin:0 0 8px;color:var(--brand)}
     #msg {color:var(--muted);font-size:15px;margin:0 0 16px;min-height:22px}
@@ -55,24 +60,25 @@
   </style>
 </head>
 <body>
-  <div id="wrap">
-    <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
-         alt="EazyCare" class="logo">
+  <main>
+    <div id="wrap">
+      <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
+           alt="EazyCare" class="logo">
 
-    <h3>กำลังเข้าสู่ระบบ…</h3>
-    <p id="msg">กรุณารอสักครู่ กำลังเริ่มต้นระบบ</p>
+      <h3>กำลังเข้าสู่ระบบ…</h3>
+      <p id="msg">กรุณารอสักครู่ กำลังเริ่มต้นระบบ</p>
 
-    <div class="loading">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
+      <div class="loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
     </div>
+  </main>
 
-      <footer>
+  <footer>
     © 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.
   </footer>
-  </div>
-
 <script>
 (async function(){
   'use strict';
@@ -91,7 +97,7 @@
     "กำลังดึงข้อมูลผู้ใช้งาน...",
     "กำลังดึงข้อมูลสินค้า...",
     "กำลังดึงข้อมูลระบบประกัน...",
-    "กำลังเชื่อมต่อเว็บไซต์ Eazy Care..."
+    "เชื่อมต่อเสร็จสิ้น"
   ];
   let stepIndex = 0;
   const stepTimer = setInterval(()=>{
@@ -118,7 +124,7 @@
     return;
   }
 
-  say("กำลังเข้าสู่ระบบที่เว็บไซต์...");
+  say("กำลังเชื่อมต่อระบบเว็บไซต์...");
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = BRIDGE_URL;
