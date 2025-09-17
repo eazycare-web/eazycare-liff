@@ -3,39 +3,92 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="referrer" content="no-referrer" />
   <title>EazyCare | กำลังเข้าสู่ระบบ…</title>
+
+  <!-- เร่ง DNS/TLS -->
+  <link rel="dns-prefetch" href="//static.line-scdn.net">
+  <link rel="dns-prefetch" href="//api.line.me">
+  <link rel="dns-prefetch" href="//www.eazycare.in.th">
+  <link rel="preconnect" href="https://static.line-scdn.net" crossorigin>
+  <link rel="preconnect" href="https://api.line.me" crossorigin>
+  <link rel="preconnect" href="https://www.eazycare.in.th">
+
+  <!-- LIFF SDK (วางบนหัวให้เริ่ม earliest) -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
-    body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto;margin:0}
-    #sso-wrap{max-width:520px;margin:40px auto;padding:0 14px;text-align:center}
+    body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto;margin:0;color:#111}
+    #wrap{max-width:520px;margin:40px auto;padding:0 14px;text-align:center}
     .muted{color:#6b7280}
+    .btn{display:inline-block;margin-top:16px;padding:10px 16px;border-radius:10px;border:1px solid #e5e7eb;background:#fff}
   </style>
 </head>
 <body>
-  <div id="sso-wrap">
+  <div id="wrap">
     <h3>กำลังเข้าสู่ระบบ...</h3>
-    <p id="sso-msg" class="muted">โปรดรอสักครู่</p>
+    <p id="msg" class="muted">กำลังเชื่อมต่อ...</p>
+    <button id="fallback" class="btn" style="display:none">แตะเพื่อเข้าสู่ระบบอีกครั้ง</button>
   </div>
+
   <script>
   (async function(){
-    const LIFF_ID      = '2008100293-QNl6ParD';
-    const REDIRECT_URL = 'https://www.eazycare.in.th/check-warranty/';
-    const BRIDGE_URL   = 'https://www.eazycare.in.th/wp-admin/admin-post.php?action=ec_liff_sso';
-    const say = (t)=> (document.getElementById('sso-msg').textContent = t);
+    'use strict';
 
-    try{ await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true }); }
-    catch(e){ say('เริ่ม LIFF ไม่สำเร็จ'); return; }
-    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+    // ====== ปรับค่าตามของคุณ ======
+    const LIFF_ID      = '2008100293-QNl6ParD';
+    const BRIDGE_URL   = 'https://www.eazycare.in.th/wp-admin/admin-post.php?action=ec_liff_sso'; // admin-post bridge (POST)
+    const REDIRECT_URL = 'https://www.eazycare.in.th/check-warranty/'; // WP ปลายทางหลังล็อกอินสำเร็จ
+
+    const $ = s => document.querySelector(s);
+    const say = t => $('#msg').textContent = t;
+
+    // แสดงปุ่มสำรองถ้าช้ากว่า 5s (บางเครื่อง iOS liFF init ช้าจริง)
+    const slowTimer = setTimeout(()=>{
+      $('#fallback').style.display = 'inline-block';
+      say('ช้ากว่าปกติ... แตะปุ่มด้านล่างเพื่อลองอีกครั้ง');
+    }, 5000);
+
+    $('#fallback').onclick = () => {
+      try { liff.login({ redirectUri: location.href }); } catch(_) { location.reload(); }
+    };
+
+    try{
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+    }catch(e){
+      clearTimeout(slowTimer);
+      say('เริ่ม LIFF ไม่สำเร็จ'); return;
+    }
+
+    if (!liff.isLoggedIn()) { 
+      // กลับมาหน้านี้หลัง login แล้วจะเร็วขึ้น
+      liff.login({ redirectUri: location.href }); 
+      return; 
+    }
 
     const idToken = liff.getIDToken();
-    if (!idToken){ say('ไม่พบ id_token (ตรวจ scope: openid)'); return; }
+    if (!idToken){ clearTimeout(slowTimer); say('ไม่พบ id_token (ตรวจ scope openid)'); return; }
 
-    // ให้ WP ตั้งคุกกี้โดยตรง (top-level redirect)
-    const url = BRIDGE_URL + '&id_token=' + encodeURIComponent(idToken) +
-                '&redir=' + encodeURIComponent(REDIRECT_URL);
-    say('กำลังเชื่อมต่อ...');
-    location.replace(url);
+    // ส่ง POST ตรงไปยัง WP Bridge (ไม่ต้อง fetch/CORS) และให้นำทางออกไปเลย
+    say('กำลังเข้าสู่ระบบที่เว็บไซต์...');
+    const form = document.createElement('form');
+    form.method  = 'POST';
+    form.action  = BRIDGE_URL;
+    form.target  = '_top'; // ให้ขึ้น top-level เสมอ
+    form.style.display = 'none';
+
+    const f1 = document.createElement('input');
+    f1.name = 'id_token';
+    f1.value = idToken;
+    form.appendChild(f1);
+
+    const f2 = document.createElement('input');
+    f2.name = 'redirect';
+    f2.value = REDIRECT_URL;
+    form.appendChild(f2);
+
+    document.body.appendChild(form);
+    clearTimeout(slowTimer);
+    form.submit();
   })();
   </script>
 </body>

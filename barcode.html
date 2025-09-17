@@ -53,11 +53,11 @@
 
     /* ปุ่ม */
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-    .btn{font-size:16px;padding:.78em 1.2em;border-radius:12px;border:0;cursor:pointer;flex:1;max-width:45%}
+    .btn{font-size:16px;padding:.78em 1.2em;border-radius:12px;border:0;cursor:pointer;flex:1;max-width:100%}
     .btn-primary{background:var(--brand); color:#fff}
     .btn-primary:hover{background:var(--brand-dark)}
     .btn-primary:disabled{opacity:.55; cursor:not-allowed}
-    .btn-ghost{background:#f8fafc; color:#334155; border:1px solid #ddd}
+    .btn-ghost{background:#f8fafc; color:#334155; border:0px solid #ddd}
 
     .msg{min-height:1.25em; margin-top:10px;text-align:center}
     .msg.ok{color:#166534} .msg.err{color:#b00020}
@@ -85,6 +85,10 @@
       </div>
       <div class="actions">
         <button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button>
+
+      </div>
+            <div class="actions">
+
         <button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button>
       </div>
       <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
