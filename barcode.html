@@ -120,7 +120,6 @@
       const dec  = liff.getDecodedIDToken && liff.getDecodedIDToken();
       ecUser = {
         lineUserId: prof?.userId || '',
-        name:       prof?.displayName || '',
         email:      dec?.email || '',   // ต้องเปิด scope email ใน LINE Developers ด้วย
         phone:      ''
       };
