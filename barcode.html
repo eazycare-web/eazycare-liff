@@ -33,7 +33,7 @@
       flex: 1; /* ดัน footer ลงล่าง */
       display: flex;
       justify-content: center;
-      align-items: flex-start; /* ให้คอนเทนต์เริ่มด้านบน */
+      align-items: flex-start;
       padding: 10px;
     }
 
@@ -46,7 +46,7 @@
     /* ===== hero ===== */
     .hero{text-align:center;margin-bottom:20px}
     .header{font-size:26px;font-weight:500;color:#91C65E;margin:10px 0 0;text-align:center;}
-        .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 0px;text-align:center;padding:0px 0px 0px 0px;}
+    .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 0px;text-align:center;}
     .hero p.lead{margin:0;color:#666;font-weight:400}
     .hero img{max-width:100%;height:auto;display:block;margin:12px auto}
 
@@ -56,7 +56,6 @@
       border-radius:16px;
       padding:5px;
       margin-top:10px;
-      /*box-shadow:0 4px 12px rgba(0,0,0,0.05);*/
     }
     .hint{color:var(--muted);margin:6px 0 12px;text-align:center}
 
@@ -74,7 +73,7 @@
       outline:none;
       letter-spacing:.14em;
       flex:1;
-      min-width:0; /* ป้องกันล้น */
+      min-width:0;
     }
     .bc-prefix{
       flex:0 0 55%;
@@ -127,166 +126,91 @@
 </head>
 <body>   
 <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
-         alt="EazyCare" class="logo">
-              <p class="header">WARRANTY REGISTRATION<br><p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
-  <main>
-  
-    <div class="wrap">
-    
+     alt="EazyCare" class="logo">
+<p class="header">WARRANTY REGISTRATION</p>
+<p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
 
-      <section class="card" aria-label="ฟอร์มบาร์โค้ด">
-      
-        <section class="hero">
-
-
-          <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
-               alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
-          <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
-        </section>
-
-        <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
-          <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก (อ่านอย่างเดียว)">
-          <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
-        </div>
-
-        <div class="actions">
-          <button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button>
-        </div>
-        <div class="actions">
-          <button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button>
-        </div>
-
-        <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
+<main>
+  <div class="wrap">
+    <section class="card" aria-label="ฟอร์มบาร์โค้ด">
+      <section class="hero">
+        <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
+             alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
+        <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
       </section>
-    </div>
-  </main>
 
-  <footer>
-    © 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.
-  </footer>
+      <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
+        <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก (อ่านอย่างเดียว)">
+        <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
+      </div>
 
-  <script>
-  (async function(){
-    'use strict';
+      <div class="actions">
+        <button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button>
+      </div>
+      <div class="actions">
+        <button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button>
+      </div>
 
-    /* ===== CONFIG (แก้เฉพาะตรงนี้ถ้าจำเป็น) ===== */
-    const LIFF_ID      = '2008100293-1xx32BzA';
-    const REGISTER_URL = 'https://www.eazycare.in.th/การรับประกัน/';  // Elementor form
-    const API_URL      = 'https://www.eazycare.in.th/wp-json/eazycare/v1/product-lookup?code=';
-    const PROXY_URL    = 'https://www.eazycare.in.th/liff-proxy/';
+      <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
+    </section>
+  </div>
+</main>
 
-    /* ===== Helpers ===== */
-    const $  = (s,r=document)=>r.querySelector(s);
-    const say = (t,ok)=>{ const el=$('#bc-msg'); el.className='msg ' + (ok?'ok':'err'); el.textContent=t||''; };
-    const onlyDigits = v => (v||'').replace(/\D+/g,'');
+<footer>
+  © 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.
+</footer>
 
-    // NEW: base64url encode JSON → ส่งข้ามโดเมนทาง query param
-    function b64urlEncodeJson(obj){
-      const json = JSON.stringify(obj);
-      const b64  = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_,p)=>String.fromCharCode('0x'+p)));
-      return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    }
+<script>
+(function(){
+  const $ = (s,r=document)=>r.querySelector(s);
+  const elPrefix = $('#bc-prefix');
+  const elTail3  = $('#bc-tail');
+  const elMsg    = $('#bc-msg');
+  const btnOk    = $('#btn-ok');
+  const btnSkip  = $('#btn-skip');
 
-/* === 1) เชื่อม LINE (ขออีเมลด้วย) === */
-    let user = {};
+  const BARCODE_PREFIX = elPrefix.value || '8851003738';
+  const REGISTER_URL   = 'https://www.eazycare.in.th/การรับประกัน/';
+  const API_URL        = 'https://www.eazycare.in.th/wp-json/eazycare/v1/product-lookup?code=';
+
+  const onlyDigits = v => (v||'').replace(/\D+/g,'');
+  const setMsg = (t, ok) => { elMsg.className = 'msg ' + (ok?'ok':'err'); elMsg.textContent = t||''; };
+
+  function onInput(){
+    let d = onlyDigits(elTail3.value);
+    if (d.length > 3) d = d.slice(-3);
+    elTail3.value = d;
+    btnOk.disabled = (d.length !== 3);
+    setMsg('', true);
+  }
+  elTail3.addEventListener('input', onInput);
+  elTail3.addEventListener('paste', ()=> requestAnimationFrame(onInput));
+  elTail3.addEventListener('keyup', e => { if (e.key === 'Enter' && !btnOk.disabled) btnOk.click(); });
+  onInput();
+
+  btnOk.addEventListener('click', async ()=>{
+    const tail3 = onlyDigits(elTail3.value);
+    if (tail3.length !== 3){ setMsg('ต้องกรอกให้ครบ 3 หลัก', false); elTail3.focus(); return; }
+
+    const fullCode13 = BARCODE_PREFIX + tail3;
+    btnOk.disabled = true;
+
+    // --- ขั้นตอนข้อความเรียงลำดับ ---
+    const msgSteps = [
+      { text: 'กำลังตรวจสอบบาร์โค้ด...', delay: 0 },
+      { text: 'กำลังดึงข้อมูลระบบสินค้า...', delay: 2000 },
+      { text: 'กำลังตรวจสอบสินค้า...', delay: 3000 }
+    ];
+    msgSteps.forEach(step=>{
+      setTimeout(()=> setMsg(step.text, true), step.delay);
+    });
+
     try{
-      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-      if (!liff.isLoggedIn()) {
-        liff.login({ redirectUri: location.href, scope: ['profile','openid','email'] }); // <<< ต้องมี email
-        return;
-      }
-      const prof = await liff.getProfile();
-      const idtk = liff.getDecodedIDToken?.();   // ต้องได้ email ถ้าเปิด permission แล้ว
-      user = {
-        lineUserId: prof?.userId || '',
-        name:       prof?.displayName || '',
-        email:      idtk?.email || '',
-        phone:      ''
-      };
-    }catch(e){
-      // นอก LINE ก็ยังใช้งานได้ แค่ไม่พรีฟิลชื่อ/อีเมล
-      console.warn('LIFF unavailable, continue without profile', e);
-    }
-
-    // ===== UI bindings =====
-    const pf   = $('#bc-prefix');
-    const tail = $('#bc-tail');
-    const ok   = $('#btn-ok');
-    const skip = $('#btn-skip');
-    const okSpin = $('#btn-ok-spin');
-    const okText = $('#btn-ok-text');
-
-    const PREFIX = pf.value || '8851003738';
-
-    function onInput(){
-      let d = onlyDigits(tail.value);
-      if (d.length > 3) d = d.slice(-3);
-      tail.value = d;
-      ok.disabled = (d.length !== 3);
-      say('', true);
-    }
-    tail.addEventListener('input', onInput);
-    tail.addEventListener('paste', ()=> requestAnimationFrame(onInput));
-    tail.addEventListener('keyup', e => { if (e.key === 'Enter' && !ok.disabled) ok.click(); });
-    onInput();
-
-    // ===== proxy (fallback) ผ่าน iframe + postMessage =====
-    const ifr = document.createElement('iframe');
-    ifr.src = PROXY_URL; ifr.style.display='none'; document.body.appendChild(ifr);
-    const PROXY_ORIGIN = new URL(PROXY_URL).origin;
-    const NONCE = Math.random().toString(36).slice(2);
-    ifr.addEventListener('load', ()=> ifr.contentWindow.postMessage({type:'ec-hello', nonce:NONCE}, PROXY_ORIGIN));
-    function proxyLookup(code13){
-      return new Promise((resolve,reject)=>{
-        function onMsg(ev){
-          if (ev.origin!==PROXY_ORIGIN) return;
-          const m = ev.data||{}; if (m.type!=='ec-lookup-res') return;
-          window.removeEventListener('message', onMsg);
-          m.ok ? resolve(m.data) : reject(new Error(m.error||'proxy error'));
-        }
-        window.addEventListener('message', onMsg);
-        ifr.contentWindow.postMessage({type:'ec-lookup', code:code13, nonce:NONCE}, PROXY_ORIGIN);
-      });
-    }
-
-    // ===== product lookup (ยิงตรงก่อน ถ้าพังค่อยผ่าน proxy) =====
-    async function lookup(code13){
-      try{
-        const res = await fetch(API_URL + encodeURIComponent(code13), {
-          method:'GET', mode:'cors', credentials:'omit', cache:'no-store', referrerPolicy:'no-referrer',
-          headers:{'Accept':'application/json'}
-        });
-        if (!res.ok) throw new Error('HTTP '+res.status);
-        return await res.json();
-      }catch(_){
-        return await proxyLookup(code13);
-      }
-    }
-
-    function setBusy(b){
-      ok.disabled = b;
-      okSpin.style.display = b ? '' : 'none';
-      okText.textContent = b ? 'กำลังตรวจสอบ…' : 'ยืนยัน';
-    }
-
-    ok.addEventListener('click', async ()=>{
-      const d = onlyDigits(tail.value);
-      if (d.length!==3){ tail.focus(); say('ต้องกรอกให้ครบ 3 หลัก', false); return; }
-
-      const code13 = PREFIX + d;
-      setBusy(true); say('กำลังตรวจสอบ...', true);
-
-     try{
-      const res = await fetch(API_URL + encodeURIComponent(fullCode13), {method:'GET', credentials:'same-origin'});
+      const res = await fetch(API_URL + encodeURIComponent(fullCode13), {method:'GET', credentials:'omit'});
       const data = await res.json();
 
       if (data && data.ok && !data.not_found && data.product_name){
-        // เพิ่มข้อความสุดท้าย: พบสินค้าแล้ว
-        setTimeout(()=>{
-          setMsg('พบสินค้าแล้ว: ' + data.product_name, true);
-        }, 2000);
-
-        // เก็บ session + redirect
+        setTimeout(()=> setMsg('พบสินค้าแล้ว: ' + data.product_name, true), 2000);
         setTimeout(()=>{
           const payload = {
             product_name:  data.product_name,
@@ -298,30 +222,25 @@
           window.location.href = REGISTER_URL;
         }, 4000);
       }else{
-        // ถ้าไม่พบ
         setTimeout(()=>{
-          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขบาร์โค้ดใหม่อีกครั้ง หรือกดข้ามหากไม่ทราบเลขบาร์โค้ด' , false);
+          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขบาร์โค้ดใหม่อีกครั้ง หรือกดข้ามหากไม่ทราบเลขบาร์โค้ด', false);
           btnOk.disabled = false;
         }, 3000);
       }
-      }catch(e){
-        console.error(e);
-        say('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”', false);
-        setBusy(false);
-      }
-    });
+    }catch(e){
+      console.error(e);
+      setTimeout(()=>{
+        setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกดข้าม', false);
+        btnOk.disabled = false;
+      }, 3000);
+    }
+  });
 
-    // กดข้าม → ส่งเฉพาะ user ไปพรีฟิลชื่อ/อีเมล
-    skip.addEventListener('click', ()=>{
-      const url = new URL(REGISTER_URL);
-      if (user && (user.name || user.email)){
-        const ecp = b64urlEncodeJson({user});
-        url.searchParams.set('ecp', ecp);
-      }
-      location.href = url.toString();
-    });
-  })();
-  </script>
-
+  btnSkip.addEventListener('click', ()=>{
+    sessionStorage.removeItem('ecProduct');
+    window.location.href = REGISTER_URL;
+  });
+})();
+</script>
 </body>
 </html>
