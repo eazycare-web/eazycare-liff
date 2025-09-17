@@ -1,15 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EazyCare LIFF</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EazyCare Warranty</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #91c65e, #4c9f70);
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    a {
+      display: block;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: bold;
+      padding: 1rem;
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-barcode {
+      background: #fff;
+      color: #4c9f70;
+    }
+
+    .btn-barcode:hover {
+      background: #f0f0f0;
+    }
+
+    .btn-sso {
+      background: #222;
+      color: #fff;
+    }
+
+    .btn-sso:hover {
+      background: #444;
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome to EazyCare LIFF</h1>
-  <ul>
-    <li><a href="barcode.html">Barcode Page</a></li>
-    <li><a href="sso.html">SSO Page</a></li>
-  </ul>
+  <h1>EazyCare Warranty</h1>
+  <p>เลือกบริการที่คุณต้องการ</p>
+
+  <div class="button-group">
+    <a href="barcode.html" class="btn-barcode">📷 สแกนบาร์โค้ด</a>
+    <a href="sso.html" class="btn-sso">🔑 เข้าสู่ระบบด้วย LINE</a>
+  </div>
+
+  <footer>
+    © 2025 EazyCare - ดูแลคุณเหมือนคนในครอบครัว
+  </footer>
 </body>
 </html>
