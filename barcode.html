@@ -157,10 +157,19 @@
 
       const full13 = BARCODE_PREFIX + tail3;
       btnOk.disabled = true;
-      setMsg('กำลังตรวจสอบบาร์โค้ด...', true);
+  const msgSteps = [
+      { text: 'กำลังตรวจสอบบาร์โค้ด...', delay: 0 },
+      { text: 'กำลังดึงข้อมูลระบบสินค้า...', delay: 2000 },
+      { text: 'กำลังตรวจสอบสินค้า...', delay: 3000 }
+    ];
 
-      try{
-        const data = await lookup(full13);
+    msgSteps.forEach(step=>{
+      setTimeout(()=> setMsg(step.text, true), step.delay);
+    });
+
+    try{
+      const res = await fetch(API_URL + encodeURIComponent(fullCode13), {method:'GET', credentials:'same-origin'});
+      const data = await res.json();
 
         if (data && data.ok && !data.not_found && data.product_name){
           setMsg('พบสินค้าแล้ว: ' + data.product_name, true);
@@ -183,7 +192,7 @@
           // เผื่อหน้า Elementor ช้าหน่อย ค่อยนำทาง
           setTimeout(()=>{ location.href = url.toString(); }, 500);
         }else{
-          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขอีกครั้ง', false);
+          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขอีกครั้ง หรือกด"ข้าม"เพื่อกรอกข้อมูลสินค้าเอง', false);
           btnOk.disabled = false;
         }
       }catch(e){
