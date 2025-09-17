@@ -1,86 +1,51 @@
-<!doctype html>
-<html lang="th">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="referrer" content="no-referrer" />
-  <title>EazyCare | กำลังเข้าสู่ระบบ…</title>
-  <!-- LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <style>
-    body{font:15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto; color:#111; margin:0; background:#fff;}
-    #sso-wrap{max-width:520px;margin:40px auto;padding:0 14px;text-align:center}
-    .muted{color:#6b7280}
-  </style>
-</head>
-<body>
-  <div id="sso-wrap">
-    <h3>กำลังเข้าสู่ระบบ...</h3>
-    <p id="sso-msg" class="muted">โปรดรอสักครู่</p>
-  </div>
+<!-- sso.html: ใช้ตัวเดิมของคุณ + เพิ่ม timeout -->
+<script>
+(async function(){
+  'use strict';
+  const LIFF_ID      = '2008100293-QNl6ParD';
+  const REDIRECT_URL = 'https://www.eazycare.in.th/check-warranty/';
+  const PROXY_URL    = 'https://www.eazycare.in.th/liff-proxy/';
+  const say = t => document.getElementById('sso-msg').textContent = t;
 
-  <script>
-  (async function(){
-    'use strict';
+  try{ await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true }); }
+  catch(e){ say('เริ่ม LIFF ไม่สำเร็จ'); return; }
+  if (!liff.isLoggedIn()){ liff.login({ redirectUri: location.href }); return; }
 
-    /* ===== CONFIG (แก้เป็นของคุณ) ===== */
-    const LIFF_ID       = '2008100293-QNl6ParD'; // LIFF ของ SSO
-    const REDIRECT_URL  = 'https://www.eazycare.in.th/check-warranty/'; // หน้าหลังล็อกอิน
-    const PROXY_URL     = 'https://www.eazycare.in.th/liff-proxy/';     // หน้า proxy ฝั่ง WP
+  const idToken = liff.getIDToken();
+  if (!idToken){ say('ไม่พบ id_token (ตรวจ scope openid)'); return; }
 
-    const elMsg = document.getElementById('sso-msg');
-    const say = (t)=> elMsg.textContent = t;
+  const ifr = document.createElement('iframe');
+  ifr.src = PROXY_URL; ifr.style.display='none'; document.body.appendChild(ifr);
+  const ORI = new URL(PROXY_URL).origin, NONCE = Math.random().toString(36).slice(2);
 
-    try {
-      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-    } catch(e) {
-      say('เริ่ม LIFF ไม่สำเร็จ'); return;
-    }
-    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+  await new Promise(res => ifr.addEventListener('load', ()=>{ ifr.contentWindow.postMessage({type:'ec-hello',nonce:NONCE}, ORI); res(); }));
 
-    const idToken = liff.getIDToken();
-    if (!idToken) { say('ไม่พบ id_token (ตรวจ scope openid ใน LINE Developers)'); return; }
-
-    // เตรียม proxy iframe + handshake
-    const iframe = document.createElement('iframe');
-    iframe.src = PROXY_URL;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const PROXY_ORIGIN = new URL(PROXY_URL).origin;
-    const NONCE = Math.random().toString(36).slice(2);
-
-    await new Promise((resolve) => {
-      iframe.addEventListener('load', () => {
-        iframe.contentWindow.postMessage({ type:'ec-hello', nonce: NONCE }, PROXY_ORIGIN);
-        resolve();
-      });
+  function proxySSO(tok){
+    return new Promise((resolve,reject)=>{
+      function onMsg(ev){
+        if (ev.origin!==ORI) return;
+        const m = ev.data||{};
+        if (m.type!=='ec-sso-res') return;
+        window.removeEventListener('message', onMsg);
+        m.ok ? resolve(m.data) : reject(new Error(m.error||'proxy error'));
+      }
+      window.addEventListener('message', onMsg);
+      ifr.contentWindow.postMessage({type:'ec-sso', id_token:tok, nonce:NONCE}, ORI);
     });
+  }
 
-    function proxySSO(idToken){
-      return new Promise((resolve, reject)=>{
-        function onMsg(ev){
-          if (ev.origin !== PROXY_ORIGIN) return;
-          const m = ev.data || {};
-          if (m.type !== 'ec-sso-res') return;
-          window.removeEventListener('message', onMsg);
-          if (m.ok) resolve(m.data); else reject(new Error(m.error||'proxy sso error'));
-        }
-        window.addEventListener('message', onMsg);
-        iframe.contentWindow.postMessage({ type:'ec-sso', id_token:idToken, nonce: NONCE }, PROXY_ORIGIN);
-      });
-    }
-
-    say('กำลังเชื่อมต่อ...');
-    try{
-      const data = await proxySSO(idToken); // เซ็ตคุกกี้ที่โดเมนหลักผ่าน proxy (same-origin)
-      if (!data || !data.ok) { say('เข้าสู่ระบบไม่สำเร็จ'); return; }
-      location.href = REDIRECT_URL;
-    }catch(e){
-      console.error(e);
-      say('เชื่อมต่อไม่ได้ กรุณาลองใหม่');
-    }
-  })();
-  </script>
-</body>
-</html>
+  say('กำลังเชื่อมต่อ...');
+  try{
+    // ถ้า 8 วิยังไม่ตอบ ให้แสดงคำแนะนำ
+    const data = await Promise.race([
+      proxySSO(idToken),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 8000))
+    ]);
+    if (!data || !data.ok){ say('เข้าสู่ระบบไม่สำเร็จ'); return; }
+    location.href = REDIRECT_URL;
+  }catch(e){
+    console.error(e);
+    say('เชื่อมต่อไม่ได้: โปรดตรวจหน้า /liff-proxy/ ว่าไม่ถูก Delay JS / ไม่บล็อก iframe');
+  }
+})();
+</script>
