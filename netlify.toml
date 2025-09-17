@@ -1,0 +1,17 @@
+
+[build]
+  publish = "."
+
+# ไม่แคช HTML และไม่ส่ง referrer
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+
+# อนุญาตเชื่อมต่อ LIFF SDK + WP + Google
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
