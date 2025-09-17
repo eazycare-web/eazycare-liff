@@ -27,9 +27,9 @@
 
     /* ====================== card ====================== */
     .card{
-      background:var(--card); border-radius:16px; padding:20px;
-      box-shadow:0 6px 20px rgba(16,24,40,.06);
-      margin-top:16px;
+      background:var(--card); border-radius:16px; padding:0px;
+
+      margin-top:40px;
     }
     .hint{color:var(--muted);margin:6px 0 12px;text-align:center}
 
@@ -68,15 +68,17 @@
 <body>
   <div class="wrap">
     <!-- hero -->
+        <section class="card" aria-label="ฟอร์มบาร์โค้ด">
     <section class="hero">
       <h1>ลงทะเบียนรับประกันสินค้า</h1>
-      <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
-      <p class="hint">ตัวอย่าง: ถ้าบาร์โค้ดขึ้นต้น 8851003738<strong>159</strong> ให้กรอก <strong>159</strong></p>
+
+      <p class="hint">ตัวอย่าง: ถ้าบาร์โค้ดคือ 8851003738<strong>159</strong> ให้กรอก <strong>159</strong></p>
       <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg" 
            alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136">
+                 <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
     </section>
 
-    <section class="card" aria-label="ฟอร์มบาร์โค้ด">
+
       <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
         <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true">
         <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159">
