@@ -3,100 +3,96 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <meta name="referrer" content="no-referrer" /> <!-- NEW: ลด sent headers -->
   <title>EazyCare | ลงทะเบียนรับประกัน</title>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- NEW: เร่ง DNS/TLS -->
+  <link rel="dns-prefetch" href="//static.line-scdn.net">
+  <link rel="dns-prefetch" href="//www.eazycare.in.th">
+  <link rel="preconnect" href="https://static.line-scdn.net" crossorigin>
+  <link rel="preconnect" href="https://www.eazycare.in.th">
+
+  <!-- NEW: LIFF SDK (ต้องมี ถ้าจะดึงโปรไฟล์ LINE) -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- ฟอนต์ + UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff;
-    }
+    :root{ --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
     body{margin:0;background:#fff;color:var(--ink);font:15px/1.55 'Prompt',sans-serif}
 
     .wrap{max-width:720px;margin:auto;padding:18px}
 
-    /* ====================== hero ====================== */
-    .hero{
-      text-align:center; margin-bottom:20px;
-    }
-    .hero h1{
-      font-size:26px; font-weight:700; color:var(--brand); margin:0 0 8px;
-    }
+    /* ===== hero ===== */
+    .hero{text-align:center;margin-bottom:20px}
+    .hero h1{font-size:26px;font-weight:700;color:var(--brand);margin:0 0 8px}
     .hero p.lead{margin:0;color:#111;font-weight:500}
     .hero img{max-width:100%;height:auto;display:block;margin:12px auto}
 
-    /* ====================== card ====================== */
-    .card{
-      background:var(--card); border-radius:16px; padding:0px;
-
-      margin-top:40px;
-    }
+    /* ===== card ===== */
+    .card{background:var(--card);border-radius:16px;padding:0;margin-top:40px}
     .hint{color:var(--muted);margin:6px 0 12px;text-align:center}
 
-    /* input group */
-    .bc-group{
-      display:flex; width:100%; max-width:100%; gap:0;
-    }
+    .bc-group{display:flex;width:100%;gap:0}
     .bc-prefix,.bc-tail{
-      font-size:18px; line-height:1.2; padding:.78em 1em; border:1px solid #ddd;
-      background:#f9fafb; outline:none; letter-spacing:.14em; flex:1;
+      font-size:18px;line-height:1.2;padding:.78em 1em;border:1px solid #ddd;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1
     }
     .bc-prefix{
-      flex:0 0 50%; max-width:50%; text-align:center; border-right:0;
-      color:#6b7280; background:#f3f4f6; border-radius:12px 0 0 12px;
-      pointer-events:none; user-select:none;
+      flex:0 0 50%;max-width:50%;text-align:center;border-right:0;color:#6b7280;background:#f3f4f6;border-radius:12px 0 0 12px;
+      pointer-events:none;user-select:none
     }
-    .bc-tail{
-      flex:1; text-align:center; border-radius:0 12px 12px 0; min-width:0;
-    }
-    .bc-tail:focus{border-color:var(--brand); box-shadow:0 0 0 2px rgba(145,198,94,.25)}
+    .bc-tail{flex:1;text-align:center;border-radius:0 12px 12px 0;min-width:0}
+    .bc-tail:focus{border-color:var(--brand);box-shadow:0 0 0 2px rgba(145,198,94,.25)}
 
-    /* ปุ่ม */
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
     .btn{font-size:16px;padding:.78em 1.2em;border-radius:12px;border:0;cursor:pointer;flex:1;max-width:100%}
-    .btn-primary{background:var(--brand); color:#fff}
+    .btn-primary{background:var(--brand);color:#fff}
     .btn-primary:hover{background:var(--brand-dark)}
-    .btn-primary:disabled{opacity:.55; cursor:not-allowed}
-    .btn-ghost{background:#f8fafc; color:#334155; border:0px solid #ddd}
+    .btn-primary:disabled{opacity:.55;cursor:not-allowed}
+    .btn-ghost{background:#f8fafc;color:#334155}
+    .msg{min-height:1.25em;margin-top:10px;text-align:center}
+    .msg.ok{color:#166534}.msg.err{color:#b00020}
 
-    .msg{min-height:1.25em; margin-top:10px;text-align:center}
-    .msg.ok{color:#166534} .msg.err{color:#b00020}
+    /* NEW: inline loader ที่ปุ่ม */
+    .btn .spin{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;margin-right:8px;vertical-align:-3px;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    footer{margin:18px auto 8px; text-align:center; color:#64748b; font-size:12px}
+    footer{margin:18px auto 8px;text-align:center;color:#64748b;font-size:12px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <!-- hero -->
-        <section class="card" aria-label="ฟอร์มบาร์โค้ด">
-    <section class="hero">
-      <h1>ลงทะเบียนรับประกันสินค้า</h1>
-
-      <p class="hint">ตัวอย่าง: ถ้าบาร์โค้ดคือ 8851003738<strong>159</strong> ให้กรอก <strong>159</strong></p>
-      <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg" 
-           alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136">
-                 <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
-    </section>
-
+    <section class="card" aria-label="ฟอร์มบาร์โค้ด">
+      <section class="hero">
+        <h1>ลงทะเบียนรับประกันสินค้า</h1>
+        <p class="hint">ตัวอย่าง: ถ้าบาร์โค้ดคือ 8851003738<strong>159</strong> ให้กรอก <strong>159</strong></p>
+        <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
+             alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
+        <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
+      </section>
 
       <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
-        <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true">
-        <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159">
+        <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก (อ่านอย่างเดียว)">
+        <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
+      </div>
+
+      <div class="actions">
+        <button id="btn-ok" class="btn btn-primary" disabled>
+          <span id="btn-ok-spin" class="spin" style="display:none"></span>
+          <span id="btn-ok-text">ยืนยัน</span>
+        </button>
       </div>
       <div class="actions">
-        <button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button>
-
-      </div>
-            <div class="actions">
-
         <button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button>
       </div>
+
       <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
     </section>
 
     <footer>© 2025 EazyCare - ดูแลคุณเหมือนคนในครอบครัว</footer>
   </div>
-  <!-- ====== JS จากโค้ดเดิมของคุณ (คงไว้ทั้งหมด) ====== -->
 
   <script>
   (async function(){
@@ -104,38 +100,38 @@
 
     /* ===== CONFIG (แก้เฉพาะตรงนี้ถ้าจำเป็น) ===== */
     const LIFF_ID      = '2008100293-1xx32BzA';
-    const REGISTER_URL = 'https://www.eazycare.in.th/การรับประกัน/';         // หน้าฟอร์ม
+    const REGISTER_URL = 'https://www.eazycare.in.th/การรับประกัน/';  // Elementor form
     const API_URL      = 'https://www.eazycare.in.th/wp-json/eazycare/v1/product-lookup?code=';
     const PROXY_URL    = 'https://www.eazycare.in.th/liff-proxy/';
 
     /* ===== Helpers ===== */
-    const $ = (s,r=document)=>r.querySelector(s);
+    const $  = (s,r=document)=>r.querySelector(s);
     const say = (t,ok)=>{ const el=$('#bc-msg'); el.className='msg ' + (ok?'ok':'err'); el.textContent=t||''; };
     const onlyDigits = v => (v||'').replace(/\D+/g,'');
 
-    // base64url (ข้ามโดเมนด้วย query param)
+    // NEW: base64url encode JSON → ส่งข้ามโดเมนทาง query param
     function b64urlEncodeJson(obj){
       const json = JSON.stringify(obj);
       const b64  = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_,p)=>String.fromCharCode('0x'+p)));
       return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    // ===== LIFF (เพื่อดึงชื่อ/อีเมล พรีฟิลให้ลูกค้าง่ายขึ้น) =====
+    // ===== LIFF: ดึงชื่อ/อีเมลพรีฟิล (ถ้าเปิดใน LINE) =====
     let user = {};
     try{
-      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true }); // NEW
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-      const prof = await liff.getProfile();
+      const prof = await liff.getProfile().catch(()=>null);
       const idtk = liff.getDecodedIDToken?.();
       user = {
         lineUserId: prof?.userId || '',
-        name: prof?.displayName || '',
-        email: idtk?.email || '',
-        phone: ''
+        name:       prof?.displayName || '',
+        email:      idtk?.email || '',
+        phone:      ''
       };
     }catch(e){
-      // ถ้าดึงไม่ได้ ก็ข้ามได้ ไม่กระทบการทำงานหลัก
-      console.warn('LIFF profile not available', e);
+      // นอก LINE ก็ยังใช้งานได้ แค่ไม่พรีฟิลชื่อ/อีเมล
+      console.warn('LIFF unavailable, continue without profile', e);
     }
 
     // ===== UI bindings =====
@@ -143,6 +139,8 @@
     const tail = $('#bc-tail');
     const ok   = $('#btn-ok');
     const skip = $('#btn-skip');
+    const okSpin = $('#btn-ok-spin');
+    const okText = $('#btn-ok-text');
 
     const PREFIX = pf.value || '8851003738';
 
@@ -158,7 +156,7 @@
     tail.addEventListener('keyup', e => { if (e.key === 'Enter' && !ok.disabled) ok.click(); });
     onInput();
 
-    // ===== proxy เตรียมไว้เป็น fallback กรณีโดนบล็อก header/cookie =====
+    // ===== proxy (fallback) ผ่าน iframe + postMessage =====
     const ifr = document.createElement('iframe');
     ifr.src = PROXY_URL; ifr.style.display='none'; document.body.appendChild(ifr);
     const PROXY_ORIGIN = new URL(PROXY_URL).origin;
@@ -177,7 +175,7 @@
       });
     }
 
-    // ===== ค้นหา + ส่งต่อแบบข้ามโดเมนด้วย query param =====
+    // ===== product lookup (ยิงตรงก่อน ถ้าพังค่อยผ่าน proxy) =====
     async function lookup(code13){
       try{
         const res = await fetch(API_URL + encodeURIComponent(code13), {
@@ -187,9 +185,14 @@
         if (!res.ok) throw new Error('HTTP '+res.status);
         return await res.json();
       }catch(_){
-        // fallback ผ่าน proxy
         return await proxyLookup(code13);
       }
+    }
+
+    function setBusy(b){
+      ok.disabled = b;
+      okSpin.style.display = b ? '' : 'none';
+      okText.textContent = b ? 'กำลังตรวจสอบ…' : 'ยืนยัน';
     }
 
     ok.addEventListener('click', async ()=>{
@@ -197,11 +200,12 @@
       if (d.length!==3){ tail.focus(); say('ต้องกรอกให้ครบ 3 หลัก', false); return; }
 
       const code13 = PREFIX + d;
-      ok.disabled = true; say('กำลังตรวจสอบ...', true);
+      setBusy(true); say('กำลังตรวจสอบ...', true);
 
       try{
         const data = await lookup(code13);
         if (data && data.ok && !data.not_found && data.product_name){
+          // NEW: แพ็ก product + user ส่งไปหน้าฟอร์มแบบ base64url
           const payload = {
             product: {
               product_name:  data.product_name,
@@ -213,22 +217,22 @@
           };
           const ecp = b64urlEncodeJson(payload);
           const url = new URL(REGISTER_URL);
-          url.searchParams.set('ecp', ecp);  // <<<<<< ส่งข้ามโดเมน
+          url.searchParams.set('ecp', ecp);
           location.href = url.toString();
         } else {
           say('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขอีกครั้ง', false);
-          ok.disabled = false;
+          setBusy(false);
         }
       }catch(e){
         console.error(e);
         say('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”', false);
-        ok.disabled = false;
+        setBusy(false);
       }
     });
 
+    // กดข้าม → ส่งเฉพาะ user ไปพรีฟิลชื่อ/อีเมล
     skip.addEventListener('click', ()=>{
       const url = new URL(REGISTER_URL);
-      // ส่งเฉพาะ user ให้พรีฟิลชื่อ/อีเมล แม้ไม่ทราบรุ่น
       if (user && (user.name || user.email)){
         const ecp = b64urlEncodeJson({user});
         url.searchParams.set('ecp', ecp);
@@ -237,7 +241,5 @@
     });
   })();
   </script>
-
-
 </body>
 </html>
