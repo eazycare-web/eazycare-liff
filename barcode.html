@@ -151,59 +151,68 @@
       return res.json();
     }
 
-    btnOk.addEventListener('click', async ()=>{
-      const tail3 = onlyDigits(elTail3.value);
-      if (tail3.length !== 3){ setMsg('ต้องกรอกให้ครบ 3 หลัก', false); elTail3.focus(); return; }
+ btnOk.addEventListener('click', async ()=>{
+  const tail3 = onlyDigits(elTail3.value);
+  if (tail3.length !== 3){ 
+    setMsg('ต้องกรอกให้ครบ 3 หลัก', false); 
+    elTail3.focus(); 
+    return; 
+  }
 
-      const full13 = BARCODE_PREFIX + tail3;
-      btnOk.disabled = true;
+  const full13 = BARCODE_PREFIX + tail3;
+  btnOk.disabled = true;
+
+  // --- queue ข้อความที่จะโชว์เรียงตามเวลา ---
   const msgSteps = [
-      { text: 'กำลังตรวจสอบบาร์โค้ด...', delay: 0 },
-      { text: 'กำลังดึงข้อมูลระบบสินค้า...', delay: 2000 },
-      { text: 'กำลังตรวจสอบสินค้า...', delay: 3000 }
-    ];
+    { text: 'กำลังตรวจสอบบาร์โค้ด...', delay: 0 },
+    { text: 'กำลังดึงข้อมูลระบบสินค้า...', delay: 1500 },
+    { text: 'กำลังตรวจสอบสินค้า...', delay: 3000 }
+  ];
 
-    msgSteps.forEach(step=>{
-      setTimeout(()=> setMsg(step.text, true), step.delay);
-    });
-
-    try{
-      const res = await fetch(API_URL + encodeURIComponent(fullCode13), {method:'GET', credentials:'same-origin'});
-      const data = await res.json();
-
-     
-      if (data && data.ok && !data.not_found && data.product_name){
-        // เพิ่มข้อความสุดท้าย: พบสินค้าแล้ว
-        setTimeout(()=>{
-          setMsg('พบสินค้าแล้ว: ' + data.product_name, true);
-        }, 2000);
-
-        // เก็บ session + redirect
-        setTimeout(()=>{
-          const payload = {
-            product_name:  data.product_name,
-            category_base: data.category_base || '',
-            system:        data.system || '',
-            category:      data.category || ''
-          };
-          sessionStorage.setItem('ecProduct', JSON.stringify(payload));
-          window.location.href = REGISTER_URL;
-        }, 4000);
-      }else{
-        // ถ้าไม่พบ
-        setTimeout(()=>{
-          setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขบาร์โค้ดใหม่อีกครั้ง หรือกด"ข้าม"เพื่อกรอกข้อมูลสินค้าเอง' , false);
-          btnOk.disabled = false;
-        }, 3000);
-      }
-    }catch(e){
-      console.error(e);
-      setTimeout(()=>{
-        setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกดข้าม', false);
-        btnOk.disabled = false;
-      }, 3000);
-    }
+  msgSteps.forEach(step=>{
+    setTimeout(()=> setMsg(step.text, true), step.delay);
   });
+
+  try{
+    const data = await lookup(full13);
+
+    if (data && data.ok && !data.not_found && data.product_name){
+      // ข้อความสุดท้าย → พบสินค้าแล้ว
+      setTimeout(()=>{
+        setMsg('พบสินค้าแล้ว: ' + data.product_name, true);
+      }, 4500);
+
+      // สร้าง payload ส่งไป Elementor
+      const payload = {
+        product: {
+          product_name:  data.product_name,
+          category_base: data.category_base || '',
+          system:        data.system || '',
+          category:      data.category || ''
+        },
+        ...(ecUser ? { user: ecUser } : {})
+      };
+
+      const ecp = b64urlEncodeJson(payload);
+      const url = new URL(REGISTER_URL);
+      url.searchParams.set('ecp', ecp);
+
+      // หน่วงนิดนึงให้ผู้ใช้เห็นข้อความ แล้วค่อยเปลี่ยนหน้า
+      setTimeout(()=>{ location.href = url.toString(); }, 1000);
+    }else{
+      setTimeout(()=>{
+        setMsg('ไม่พบสินค้าในระบบ กรุณาตรวจสอบเลขอีกครั้ง หรือกด "ข้าม" เพื่อกรอกข้อมูลเอง', false);
+        btnOk.disabled = false;
+      }, 4000);
+    }
+  }catch(e){
+    console.error(e);
+    setTimeout(()=>{
+      setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”', false);
+      btnOk.disabled = false;
+    }, 3500);
+  }
+});
 
 
     btnSkip.addEventListener('click', ()=>{
