@@ -106,7 +106,7 @@
     dot = (dot + 1) % 4;
     const base = document.querySelector('#msg')?.textContent?.replace(/\.*$/,'') || '';
     say(base + '.'.repeat(dot));
-  }, 450);
+  }, 850);
 
   // ข้อความขั้นบันได
   const steps = [
@@ -121,12 +121,12 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   for (const s of steps.slice(0, 4)) { // โชว์ 4 ขั้นแรกแบบเร็ว ๆ
     say(s);
-    await sleep(550);
+    await sleep(850);
   }
 
   // โชว์ "เข้าสู่ระบบเสร็จสิ้น" สั้น ๆ เพื่อความรู้สึกไม่ค้าง แล้วค่อยเปลี่ยนหน้า
   say(steps[4]);
-  await sleep(400);
+  await sleep(800);
 
   // ยิง redirect แบบ top-level
   location.replace(target);
@@ -139,7 +139,7 @@
       fallbackBtn.style.display = "inline-block";
       say("ระบบช้ากว่าปกติ กำลังพยายามเชื่อมต่อ…");
     }
-  }, 5000);
+  }, 10000);
 
   // ถ้าผู้ใช้กลับมาจากการยกเลิก/ผิดพลาด ให้หยุดแอนิเมชัน
   window.addEventListener('pagehide', () => clearInterval(anim));
