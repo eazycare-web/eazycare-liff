@@ -131,15 +131,7 @@
   // ยิง redirect แบบ top-level
   location.replace(target);
 
-  // ---------- แผนสำรอง ----------
-  // ถ้า 5 วินาทีผ่านไปแล้วยังไม่ออกจากหน้านี้ (เน็ตช้า/โดนบล็อค/เปิดใน webview แปลก ๆ)
-  // จะแสดงปุ่มให้ผู้ใช้กดเอง
-  setTimeout(() => {
-    if (document.visibilityState === 'visible') {
-      fallbackBtn.style.display = "inline-block";
-      say("ระบบช้ากว่าปกติ กำลังพยายามเชื่อมต่อ…");
-    }
-  }, 10000);
+
 
   // ถ้าผู้ใช้กลับมาจากการยกเลิก/ผิดพลาด ให้หยุดแอนิเมชัน
   window.addEventListener('pagehide', () => clearInterval(anim));
