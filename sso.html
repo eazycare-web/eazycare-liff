@@ -60,54 +60,43 @@
 
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 (async function(){
   'use strict';
 
-  const LIFF_ID = "2008100293-QNl6ParD";   // LIFF SSO
-  const API_URL = "https://www.eazycare.in.th/wp-json/eazycare/v1/line-sso";
-  const REDIRECT_URL = "https://www.eazycare.in.th/check-warranty/";
+  const LIFF_ID = "2008100293-QNl6ParD"; // ของคุณ
+  const WP_BASE = "https://www.eazycare.in.th";
+  const REDIRECT_PATH = "/check-warranty/"; // พาธบน WP
 
   const say = t => document.querySelector('#msg').textContent = t;
 
-  try {
-    // เริ่ม LIFF
-    say("กำลังเชื่อมต่อกับ LINE…");
-    await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+  // 1) init LIFF
+  say("กำลังเชื่อมต่อกับ LINE…");
+  await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
 
-    if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: location.href });
-      return;
-    }
-
-    // ได้ token จาก LINE
-    say("กำลังดึงข้อมูลผู้ใช้งาน…");
-    const idToken = liff.getIDToken();
-    if (!idToken) { say("ไม่พบ id_token"); return; }
-
-    // ยิงไปที่ WordPress REST API
-    say("กำลังเชื่อมต่อระบบเว็บไซต์…");
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ id_token: idToken })
-    });
-
-    const data = await res.json();
-    if (data && data.ok) {
-      say("เข้าสู่ระบบสำเร็จ…");
-      setTimeout(()=>{ location.href = REDIRECT_URL; }, 0);
-    } else {
-      say("ไม่สามารถเข้าสู่ระบบได้");
-      console.error(data);
-    }
-
-  } catch(e) {
-    console.error(e);
-    say("เกิดข้อผิดพลาด: " + e.message);
+  if (!liff.isLoggedIn()) {
+    // IMPORTANT: redirectUri ต้องเป็น URL ของ sso.html (โดเมน Vercel) แบบเต็ม
+    liff.login({ redirectUri: window.location.href });
+    return;
   }
+
+  // 2) เอา id_token
+  say("กำลังดึงข้อมูลผู้ใช้งาน…");
+  const idToken = liff.getIDToken();
+  if (!idToken) { say("ไม่พบ id_token"); return; }
+
+  // 3) เปลี่ยนเป็น top-level redirect → WP admin-post
+  say("กำลังเข้าสู่ระบบบนเว็บไซต์…");
+  const target = `${WP_BASE}/wp-admin/admin-post.php` +
+                 `?action=ec_liff_sso` +
+                 `&id_token=${encodeURIComponent(idToken)}` +
+                 `&redir=${encodeURIComponent(REDIRECT_PATH)}`;
+
+  // ใช้ replace เพื่อไม่ทิ้งประวัติ
+  location.replace(target);
 })();
 </script>
+
 </body>
 </html>
