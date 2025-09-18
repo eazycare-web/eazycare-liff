@@ -65,18 +65,17 @@
 (async function(){
   'use strict';
 
-  const LIFF_ID = "2008100293-QNl6ParD"; // ของคุณ
+  const LIFF_ID = "2008100293-QNl6ParD";
   const WP_BASE = "https://www.eazycare.in.th";
-  const REDIRECT_PATH = "/check-warranty/"; // พาธบน WP
+  const REDIRECT_PATH = "/check-warranty/";
 
-  const say = t => document.querySelector('#msg').textContent = t;
+  const say = t => { const el = document.querySelector('#msg'); if (el) el.textContent = t; };
 
   // 1) init LIFF
   say("กำลังเชื่อมต่อกับ LINE…");
   await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
 
   if (!liff.isLoggedIn()) {
-    // IMPORTANT: redirectUri ต้องเป็น URL ของ sso.html (โดเมน Vercel) แบบเต็ม
     liff.login({ redirectUri: window.location.href });
     return;
   }
@@ -86,15 +85,67 @@
   const idToken = liff.getIDToken();
   if (!idToken) { say("ไม่พบ id_token"); return; }
 
-  // 3) เปลี่ยนเป็น top-level redirect → WP admin-post
-  say("กำลังเข้าสู่ระบบบนเว็บไซต์…");
-const target = 'https://www.eazycare.in.th/wp-admin/admin-post.php'
-             + '?action=ec_liff_sso'
-             + '&id_token=' + encodeURIComponent(idToken)
-             + '&redir='    + encodeURIComponent('/check-warranty/');
-location.replace(target);
+  // 3) แสดงข้อความแบบเป็นขั้น ๆ + แผนสำรองถ้าไม่เด้ง
+  const target = `${WP_BASE}/wp-admin/admin-post.php`
+               + `?action=ec_liff_sso`
+               + `&id_token=${encodeURIComponent(idToken)}`
+               + `&redir=${encodeURIComponent(REDIRECT_PATH)}`;
+
+  // สร้างปุ่มสำรอง (จะโชว์ถ้ายังไม่ออกจากหน้านี้ในเวลา X วิ)
+  const fallbackBtn = document.createElement('a');
+  fallbackBtn.href = target;
+  fallbackBtn.textContent = "คลิกที่นี่หากระบบยังไม่พาไปต่อ";
+  fallbackBtn.style.display = "none";
+  fallbackBtn.style.marginTop = "12px";
+  fallbackBtn.style.fontSize = "14px";
+  document.querySelector('#wrap')?.appendChild(fallbackBtn);
+
+  // แอนิเมชันจุด ๆ เพื่อให้รู้ว่ากำลังทำงาน
+  let dot = 0;
+  const anim = setInterval(() => {
+    dot = (dot + 1) % 4;
+    const base = document.querySelector('#msg')?.textContent?.replace(/\.*$/,'') || '';
+    say(base + '.'.repeat(dot));
+  }, 450);
+
+  // ข้อความขั้นบันได
+  const steps = [
+    "กำลังเชื่อมต่อระบบเว็บไซต์",
+    "กำลังตรวจสอบข้อมูลกับ LINE",
+    "กำลังสร้างเซสชันเข้าสู่ระบบ",
+    "พร้อมแล้ว… กำลังพาไปยังหน้าข้อมูลประกัน",
+    "เข้าสู่ระบบเสร็จสิ้น"
+  ];
+
+  // ไล่แสดงข้อความทีละช่วงสั้น ๆ ก่อนเปลี่ยนหน้า
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  for (const s of steps.slice(0, 4)) { // โชว์ 4 ขั้นแรกแบบเร็ว ๆ
+    say(s);
+    await sleep(550);
+  }
+
+  // โชว์ "เข้าสู่ระบบเสร็จสิ้น" สั้น ๆ เพื่อความรู้สึกไม่ค้าง แล้วค่อยเปลี่ยนหน้า
+  say(steps[4]);
+  await sleep(400);
+
+  // ยิง redirect แบบ top-level
+  location.replace(target);
+
+  // ---------- แผนสำรอง ----------
+  // ถ้า 5 วินาทีผ่านไปแล้วยังไม่ออกจากหน้านี้ (เน็ตช้า/โดนบล็อค/เปิดใน webview แปลก ๆ)
+  // จะแสดงปุ่มให้ผู้ใช้กดเอง
+  setTimeout(() => {
+    if (document.visibilityState === 'visible') {
+      fallbackBtn.style.display = "inline-block";
+      say("ระบบช้ากว่าปกติ กำลังพยายามเชื่อมต่อ…");
+    }
+  }, 5000);
+
+  // ถ้าผู้ใช้กลับมาจากการยกเลิก/ผิดพลาด ให้หยุดแอนิเมชัน
+  window.addEventListener('pagehide', () => clearInterval(anim));
 })();
 </script>
+
 
 </body>
 </html>
