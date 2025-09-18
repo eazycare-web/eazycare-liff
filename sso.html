@@ -88,13 +88,11 @@
 
   // 3) เปลี่ยนเป็น top-level redirect → WP admin-post
   say("กำลังเข้าสู่ระบบบนเว็บไซต์…");
-  const target = `${WP_BASE}/wp-admin/admin-post.php` +
-                 `?action=ec_liff_sso` +
-                 `&id_token=${encodeURIComponent(idToken)}` +
-                 `&redir=${encodeURIComponent(REDIRECT_PATH)}`;
-
-  // ใช้ replace เพื่อไม่ทิ้งประวัติ
-  location.replace(target);
+const target = 'https://www.eazycare.in.th/wp-admin/admin-post.php'
+             + '?action=ec_liff_sso'
+             + '&id_token=' + encodeURIComponent(idToken)
+             + '&redir='    + encodeURIComponent('/check-warranty/');
+location.replace(target);
 })();
 </script>
 
