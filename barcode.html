@@ -10,30 +10,30 @@
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-  <style>
+<style>
     :root{ --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
 
     html, body {height:100%;margin:0;overflow-x:hidden;display:flex;flex-direction:column;background:#fff;color:var(--ink);}
-    main {flex:1;display:flex;justify-content:center;align-items:flex-start;padding:10px;}
+    main {flex:1;display:flex;justify-content:center;align-items:center;padding:10px;}
     .wrap {width:100%;max-width:720px;}
     .logo {width:100px;max-width:30%;margin:0 auto;height:auto;display:block;padding:30px 0 0;}
 
     .hero{text-align:center;margin-bottom:20px}
-    .header{font-size:26px;font-weight:500;color:#91C65E;margin:10px 0 0;text-align:center;}
-    .subtext{font-size:15px;font-weight:500;color:#666;margin:0;text-align:center;}
+    .header{font-size:2.7em;font-weight:600;color:#91C65E;line-height:1.0;margin:0px 0 0;text-align:center;justify-content:center;align-items:center;}
+    .subtext{font-size:15px;font-weight:500;color:#666;margin:0px;text-align:center;justify-content:center;align-items:center;}
     .hero p.lead{margin:0;color:#666;font-weight:400}
     .hero img{max-width:100%;height:auto;display:block;margin:12px auto}
 
     .card{background:var(--card);border-radius:16px;padding:5px;margin-top:10px;}
     .bc-group{display:flex;width:100%}
     .bc-prefix,.bc-tail{font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1;min-width:0}
-    .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;background:#f3f4f6;color:#6b7280;border-radius:50px 0 0 50px;pointer-events:none;user-select:none}
-    .bc-tail{text-align:center;border-radius:0 50px 50px 0}
+    .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;background:#f3f4f6;color:#6b7280;border-radius:10px 0 0 10px;pointer-events:none;user-select:none}
+    .bc-tail{text-align:center;border-radius:0 10px 10px 0}
     .bc-tail:focus{border-color:var(--brand);box-shadow:0 0 0 0px rgba(145,198,94,.25)}
 
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-    .btn{font-size:16px;padding:.58em 1.2em;border-radius:10px;border:0;cursor:pointer;flex:1;max-width:100%}
+    .btn{font-size:16px;padding:.58em 1.2em;border-radius:50px;border:0;cursor:pointer;flex:1;max-width:100%}
     .btn-primary{background:var(--brand);color:#fff}
     .btn-primary:hover{background:var(--brand-dark)}
     .btn-primary:disabled{opacity:.55;cursor:not-allowed}
@@ -45,13 +45,15 @@
   </style>
 </head>
 <body>
-  <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
-       alt="EazyCare" class="logo">
-  <p class="header">WARRANTY REGISTRATION</p>
-  <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
 
   <main>
     <div class="wrap">
+
+
+      <p class="header">REGISTRATION</p>
+      <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
+
+      <!-- การ์ดฟอร์ม -->
       <section class="card" aria-label="ฟอร์มบาร์โค้ด">
         <section class="hero">
           <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
