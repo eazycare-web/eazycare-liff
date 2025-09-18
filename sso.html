@@ -18,19 +18,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
-    :root { --brand:#91C65E; --muted:#6b7280; }
+    :root {
+      --brand:#91C65E;
+      --muted:#6b7280;
+    }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
-    body {margin:0; background:#fff; color:#111; display:flex; flex-direction:column; min-height:100vh;}
-    main {flex:1; display:flex; align-items:center; justify-content:center; padding:20px;}
+    body {
+      margin:0; background:#fff; color:#111;
+      display:flex; flex-direction:column;
+      min-height:100vh;
+    }
+    main {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding:20px;
+    }
     #wrap {max-width:420px;width:100%;text-align:center}
-
+    
     .logo {width:120px;margin:0 auto 20px;display:block}
     h3 {font-size:22px;font-weight:600;margin:0 0 8px;color:var(--brand)}
     #msg {color:var(--muted);font-size:15px;margin:0 0 16px;min-height:22px}
 
     .loading {display:flex;justify-content:center;gap:6px;margin:14px auto}
-    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;
-      animation:bounce 1.2s infinite ease-in-out;}
+    .dot {
+      width:10px;height:10px;background:var(--brand);
+      border-radius:50%;animation:bounce 1.2s infinite ease-in-out;
+    }
     .dot:nth-child(2){animation-delay:0.2s}
     .dot:nth-child(3){animation-delay:0.4s}
     @keyframes bounce {
@@ -38,7 +50,13 @@
       40%{transform:scale(1);opacity:1}
     }
 
-    footer {text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
+    footer{
+      text-align:center;
+      color:#fff;
+      background-color:#91C65E;
+      font-size:12px;
+      padding:12px;
+    }
   </style>
 </head>
 <body>
@@ -58,61 +76,77 @@
     </div>
   </main>
 
-  <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
-
+  <footer>
+    © 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.
+  </footer>
 <script>
 (async function(){
   'use strict';
 
-  const LIFF_ID      = '2008100293-QNl6ParD';       // LIFF SSO
-  const REDIRECT_URL = 'https://www.eazycare.in.th/check-warranty/';
-  const API_URL      = 'https://www.eazycare.in.th/wp-json/eazycare/v1/line-sso';
+  const LIFF_ID = '2008100293-QNl6ParD';
+  const REDIRECT_PATH = '/check-warranty/';
+  const BRIDGE_URL    = 'https://www.eazycare.in.th/wp-admin/admin-post.php?action=ec_liff_sso';
 
-  const say = t => document.querySelector('#msg').textContent = t;
+  const $ = s => document.querySelector(s);
+  const say = t => { $('#msg').textContent = t; };
+
+  // ข้อความตามลำดับขั้นตอน
+  const steps = [
+    "กรุณารอสักครู่ กำลังเริ่มต้นระบบ",
+    "กำลังเชื่อมต่อกับ LINE...",
+    "กำลังดึงข้อมูลผู้ใช้งาน...",
+    "กำลังดึงข้อมูลสินค้า...",
+    "กำลังดึงข้อมูลระบบประกัน...",
+    "เชื่อมต่อเสร็จสิ้น"
+  ];
+  let stepIndex = 0;
+  const stepTimer = setInterval(()=>{
+    stepIndex++;
+    if(stepIndex < steps.length){ say(steps[stepIndex]); }
+    else { clearInterval(stepTimer); }
+  }, 2000); // ทุก 2 วินาที เปลี่ยนข้อความ
 
   try {
-    // เริ่ม LIFF
-    say("กำลังเชื่อมต่อกับ LINE…");
     await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-
-    if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: location.href });
-      return;
-    }
-
-    // ได้ token จาก LINE
-    say("กำลังดึงข้อมูลผู้ใช้งาน…");
-    const idToken = liff.getIDToken();
-    if (!idToken) { say("ไม่พบ id_token"); return; }
-
-    // ยิงไปที่ WordPress REST API
-    say("กำลังเชื่อมต่อระบบเว็บไซต์…");
-    const res = await fetch(API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      credentials:'omit',   // ✅ แก้จาก include → omit
-      body: JSON.stringify({ id_token:idToken })
-    });
-
-    const text = await res.text();
-    console.log("API raw response:", text);
-
-    let data;
-    try { data = JSON.parse(text); }
-    catch(e) { say("API ไม่ได้ส่ง JSON กลับมา"); return; }
-
-    if (data && data.ok) {
-      say("เข้าสู่ระบบสำเร็จ กำลังนำทาง…");
-      setTimeout(()=>{ location.href = REDIRECT_URL; }, 1000);
-    } else {
-      say("ไม่สามารถเข้าสู่ระบบได้");
-    }
-
-  } catch(e) {
-    console.error(e);
-    say("เกิดข้อผิดพลาด: " + e.message);
+  } catch(e){
+    say("เริ่ม LIFF ไม่สำเร็จ");
+    return;
   }
+
+  if (!liff.isLoggedIn()) {
+    liff.login({ redirectUri: location.href });
+    return;
+  }
+
+  const idToken = liff.getIDToken();
+  if (!idToken){
+    say("ไม่พบ id_token (ตรวจ scope openid)");
+    return;
+  }
+
+  say("กำลังเชื่อมต่อระบบเว็บไซต์...");
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = BRIDGE_URL;
+  form.target = '_top';
+  form.style.display = 'none';
+
+  const f1 = document.createElement('input');
+  f1.type = 'hidden';
+  f1.name = 'id_token';
+  f1.value = idToken;
+  form.appendChild(f1);
+
+  const f2 = document.createElement('input');
+  f2.type = 'hidden';
+  f2.name = 'redirect';
+  f2.value = REDIRECT_PATH;
+  form.appendChild(f2);
+
+  document.body.appendChild(form);
+  form.submit();
 })();
 </script>
+
 </body>
 </html>
