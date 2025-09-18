@@ -3,149 +3,156 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-store" />
   <title>EazyCare | กำลังเข้าสู่ระบบ…</title>
 
-  <!-- Preconnect / DNS -->
+  <!-- เร่ง DNS/TLS -->
   <link rel="dns-prefetch" href="//static.line-scdn.net">
   <link rel="dns-prefetch" href="//api.line.me">
   <link rel="dns-prefetch" href="//www.eazycare.in.th">
   <link rel="preconnect" href="https://static.line-scdn.net" crossorigin>
   <link rel="preconnect" href="https://api.line.me" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.eazycare.in.th">
 
-  <!-- Fonts (display=swap เพื่อลดบล็อกเรนเดอร์) -->
+  <!-- ฟอนต์ -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- LIFF SDK (ครั้งเดียว) -->
+  <!-- LIFF SDK (โหลดครั้งเดียว + defer) -->
   <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-  <!-- Preload โลโก้ ลด CLS -->
-  <link rel="preload" as="image" href="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png" imagesrcset="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png 1x">
 
   <style>
     :root { --brand:#91C65E; --muted:#6b7280; }
-    *{box-sizing:border-box;font-family:'Prompt',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    html,body{height:100%}
+    *{box-sizing:border-box;font-family:'Prompt',sans-serif}
     body {margin:0; background:#fff; color:#111; display:flex; flex-direction:column; min-height:100vh;}
     main {flex:1; display:flex; align-items:center; justify-content:center; padding:20px;}
     #wrap {max-width:420px;width:100%;text-align:center}
-    .logo {width:120px;height:auto;margin:0 auto 20px;display:block;aspect-ratio:5/2;object-fit:contain}
+
+    .logo {width:120px;margin:0 auto 20px;display:block}
     h3 {font-size:22px;font-weight:600;margin:0 0 8px;color:var(--brand)}
     #msg {color:var(--muted);font-size:15px;margin:0 0 16px;min-height:22px}
+
     .loading {display:flex;justify-content:center;gap:6px;margin:14px auto}
-    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;animation:bounce 1.2s infinite ease-in-out}
+    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;
+      animation:bounce 1.2s infinite ease-in-out;}
     .dot:nth-child(2){animation-delay:0.2s}
     .dot:nth-child(3){animation-delay:0.4s}
-    @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.6} 40%{transform:scale(1);opacity:1} }
-    .fallback {display:none;margin-top:12px;font-size:14px}
-    footer {text-align:center;color:#fff;background:#91C65E;font-size:12px;padding:12px}
+    @keyframes bounce {
+      0%,80%,100%{transform:scale(0.6);opacity:0.6}
+      40%{transform:scale(1);opacity:1}
+    }
+
+    footer {text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
   </style>
 </head>
 <body>
   <main>
     <div id="wrap">
       <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
-           alt="EazyCare" class="logo" fetchpriority="high">
+           alt="EazyCare" class="logo">
 
       <h3>กำลังเข้าสู่ระบบ…</h3>
-      <p id="msg" aria-live="polite">กำลังเริ่มต้นระบบ</p>
+      <p id="msg">กำลังเริ่มต้นระบบ</p>
 
       <div class="loading" aria-hidden="true">
         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
       </div>
-
-      <a id="fallback" class="fallback" href="#">คลิกที่นี่หากระบบยังไม่พาไปต่อ</a>
     </div>
   </main>
 
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
-  <script>
-  (function(){
-    'use strict';
+<script defer>
+/**
+ * เวอร์ชันเร่งความเร็ว:
+ * - แสดงข้อความหมุนเวียนแบบ non-blocking
+ * - ได้ id_token ปุ๊บ → location.replace() ทันที (ไม่รอข้อความ “สำเร็จ”)
+ * - มี watchdog บังคับรีไดเรกต์ซ้ำอีกชั้นถ้าเบราว์เซอร์นิ่ง
+ */
+(function(){
+  'use strict';
 
-    const LIFF_ID = "2008100293-QNl6ParD";
-    const WP_BASE = "https://www.eazycare.in.th";
-    const REDIRECT_PATH = "/check-warranty/";
+  const LIFF_ID      = "2008100293-QNl6ParD";
+  const WP_BASE      = "https://www.eazycare.in.th";
+  const REDIRECT_TO  = "/check-warranty/";
 
-    const $ = sel => document.querySelector(sel);
-    const say = t => { const el = $('#msg'); if (el) el.textContent = t; };
+  const $msg = () => document.getElementById('msg');
+  const say  = t => { const el=$msg(); if (el) el.textContent = t; };
 
-    // สเต็ปข้อความ "เหมือนทำงานต่อเนื่อง" แต่ไม่หน่วง redirect
-    const steps = [
-      "กำลังเชื่อมต่อกับ LINE…",
-      "กำลังตรวจสอบข้อมูลกับ LINE…",
-      "กำลังสร้างเซสชันเข้าสู่ระบบ…",
-      "พร้อมแล้ว กำลังพาไปยังหน้าข้อมูลประกัน…",
-      "เข้าสู่ระบบเสร็จสิ้น"
-    ];
-    let stepIdx = 0;
-    const stepTimer = setInterval(() => {
-      stepIdx = (stepIdx + 1) % steps.length;
-      say(steps[stepIdx]);
-    }, 700);
+  // ข้อความหมุนเวียน (เพื่อ UX เท่านั้น ไม่บล็อกงานจริง)
+  const steps = [
+    "กำลังเชื่อมต่อระบบเว็บไซต์",
+    "กำลังตรวจสอบข้อมูลกับ LINE",
+    "กำลังสร้างเซสชันเข้าสู่ระบบ",
+    "เตรียมพาไปยังหน้าข้อมูลประกัน"
+  ];
+  let stepIdx = 0;
+  let dots = 0;
+  const uiTimer = setInterval(()=>{
+    dots = (dots + 1) % 4;
+    stepIdx = (stepIdx + (dots===0?1:0)) % steps.length;
+    say(steps[stepIdx] + '.'.repeat(dots));
+  }, 500);
 
-    // จุดไข่ปลาให้หยุดเมื่อออกจากหน้า
-    const stopAll = () => { try{ clearInterval(stepTimer); }catch(_){} };
-    window.addEventListener('pagehide', stopAll, { once:true });
-    window.addEventListener('beforeunload', stopAll, { once:true });
+  // บังคับเคลียร์ UI เมื่อออกจากหน้า
+  const stopUI = ()=>{ try{ clearInterval(uiTimer); }catch(_){} };
+  window.addEventListener('pagehide', stopUI);
+  window.addEventListener('beforeunload', stopUI);
 
-    // เริ่ม LIFF เมื่อ SDK โหลดเสร็จ (script ใส่ defer แล้ว แต่กันเหนียว)
-    const start = async () => {
-      try {
-        say("กำลังเริ่มต้นระบบ…");
-        if (!window.liff) { say("กำลังเตรียม LIFF…"); await new Promise(r => setTimeout(r, 50)); }
+  // เริ่มทำงาน LIFF ทันทีที่ SDK โหลดเสร็จ (script นี้ defer ตาม SDK)
+  const boot = async () => {
+    try {
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
 
-        await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-
-        if (!liff.isLoggedIn()) {
-          // ให้ LINE จัดการ login แล้วเด้งกลับหน้านี้
-          liff.login({ redirectUri: location.href });
-          return;
-        }
-
-        // ได้ id_token แล้ว → สร้าง URL และ "สั่งไปต่อทันที"
-        say("กำลังดึงข้อมูลผู้ใช้งาน…");
-        const idToken = liff.getIDToken();
-        if (!idToken) { say("ไม่พบ id_token (กรุณาลองใหม่)"); return; }
-
-        const target = `${WP_BASE}/wp-admin/admin-post.php`
-          + `?action=ec_liff_sso`
-          + `&id_token=${encodeURIComponent(idToken)}`
-          + `&redir=${encodeURIComponent(REDIRECT_PATH)}`;
-
-        // ตั้งค่า fallback link ทันที
-        const fb = $('#fallback');
-        if (fb) { fb.href = target; }
-
-        // === เปลี่ยนหน้า "ทันที" แบบไม่รอข้อความ ===
-        // 1) microtask
-        queueMicrotask(() => { location.replace(target); });
-        // 2) macrotask สำรองเผื่อ microtask โดนบล็อก
-        setTimeout(() => { if (!document.hidden) location.replace(target); }, 50);
-        // 3) safety fallback: ถ้า 2.5s แล้วยังไม่ไป ให้โชว์ปุ่ม
-        setTimeout(() => { if (!document.hidden && fb) fb.style.display = 'inline-block'; }, 2500);
-
-        // โชว์จุดไข่ปลา/ข้อความต่อไปเรื่อย ๆ จนกว่าจะ pagehide → ผู้ใช้จะไม่รู้สึกค้าง
-        say("กำลังเชื่อมต่อกับระบบ…");
-
-      } catch (err) {
-        console.error(err);
-        say("เกิดข้อผิดพลาดในการเริ่มต้นระบบ (LIFF). โปรดลองอีกครั้ง");
-        const fb = $('#fallback');
-        if (fb) fb.style.display = 'inline-block';
+      if (!liff.isLoggedIn()) {
+        // ส่งกลับที่เดิมเพื่อ flow ต่อเนื่อง
+        liff.login({ redirectUri: location.href });
+        return;
       }
-    };
 
-    // เริ่มเมื่อ DOM พร้อม (กัน race condition)
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', start, { once:true });
-    } else {
-      start();
+      // บางเครื่อง token มาช้า → ลองรอแบบสั้น ๆ (ไม่เกิน ~1.5s)
+      let idToken = liff.getIDToken();
+      let tries = 0;
+      while (!idToken && tries < 15) {
+        await new Promise(r=>setTimeout(r,100));
+        idToken = liff.getIDToken();
+        tries++;
+      }
+
+      if (!idToken) {
+        // ถ้าไม่มีจริง ๆ ให้ลองสั่ง login ใหม่แบบเงียบ
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+
+      // ได้ token แล้ว → รีไดเรกต์ “ทันที” (งานหนักให้ WP ทำต่อ)
+      const target = WP_BASE + '/wp-admin/admin-post.php'
+                   + '?action=ec_liff_sso'
+                   + '&id_token=' + encodeURIComponent(idToken)
+                   + '&redir='    + encodeURIComponent(REDIRECT_TO);
+
+      // Watchdog: ถ้า replace ไม่วิ่ง (เช่น บราว์เซอร์กด back เร็ว ๆ) ให้ยิงซ้ำอัตโนมัติ
+      let jumped = false;
+      const forceJump = () => {
+        if (!jumped) { jumped = true; location.replace(target); }
+      };
+      // ยิงทันที 1 ครั้ง
+      forceJump();
+      // แล้วยิงสำรองอีก 2 จังหวะ
+      setTimeout(forceJump, 300);
+      setTimeout(forceJump, 1200);
+
+    } catch (err) {
+      console.error('[SSO] LIFF error:', err);
+      say('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่');
+      // เผื่อไว้: กลับไปโฮมเพจหลัง 2 วิ
+      setTimeout(()=>{ location.replace(WP_BASE); }, 2000);
     }
-  })();
-  </script>
+  };
+
+  // ถ้า SDK ยังไม่พร้อม ให้รอ event ‘load’ แล้วค่อย boot
+  if (window.liff) boot();
+  else window.addEventListener('load', boot, { once:true });
+
+})();
+</script>
 </body>
 </html>
