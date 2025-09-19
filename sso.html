@@ -16,7 +16,7 @@
   <!-- ฟอนต์ -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- LIFF SDK (async) -->
+  <!-- LIFF SDK โหลดแบบ async (ไม่บล็อกหน้า) -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" async></script>
 
   <style>
@@ -29,7 +29,8 @@
     h3 {font-size:22px;font-weight:600;margin:0 0 8px;color:var(--brand)}
     #msg {color:var(--muted);font-size:15px;margin:0 0 16px;min-height:22px}
     .loading {display:flex;justify-content:center;gap:6px;margin:14px auto}
-    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;animation:bounce 1.2s infinite ease-in-out}
+    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;
+      animation:bounce 1.2s infinite ease-in-out}
     .dot:nth-child(2){animation-delay:0.2s}
     .dot:nth-child(3){animation-delay:0.4s}
     @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.6}40%{transform:scale(1);opacity:1}}
@@ -42,7 +43,9 @@
       <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png" alt="EazyCare" class="logo">
       <h3>กำลังเข้าสู่ระบบ…</h3>
       <p id="msg">กำลังเริ่มต้นระบบ</p>
-      <div class="loading" aria-hidden="true"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="loading" aria-hidden="true">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
     </div>
   </main>
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
@@ -56,104 +59,74 @@
   const REDIRECT_TO = "/check-warranty/";
 
   const $msg = () => document.getElementById('msg');
-  const say  = t => { const el=$msg(); if (el) el.textContent=t; };
+  const say  = t => { const el = $msg(); if (el) el.textContent = t; };
 
-  /* ---------- ข้อความหมุนเวียน: hybrid ticker (rAF + setTimeout fallback) ---------- */
+  /* ---------- ข้อความหมุนเวียน (setInterval ล้วน ๆ ให้ขึ้นแน่ ๆ) ---------- */
   const steps = [
     "กำลังเชื่อมต่อระบบเว็บไซต์",
     "กำลังตรวจสอบข้อมูลกับ LINE",
     "กำลังสร้างเซสชันเข้าสู่ระบบ",
     "เตรียมพาไปยังหน้าข้อมูลประกัน"
   ];
-  let step = 0, dots = 0;
-  let last = 0, accStep = 0, accDot = 0;
-  const STEP_MS = 1400;
-  const DOT_MS  = 350;
-  let uiAlive = true;
+  let stepIdx = 0, dots = 0;
+  say(steps[0]); // เริ่มแสดงข้อความแรกทันที
 
-  // แสดงทันทีตั้งแต่เริ่ม
-  say(steps[0] + '.');
+  const dotTimer  = setInterval(()=>{ dots = (dots+1)%4; say(steps[stepIdx] + '.'.repeat(dots)); }, 350);
+  const stepTimer = setInterval(()=>{ stepIdx = (stepIdx+1)%steps.length; dots = 0; say(steps[stepIdx]); }, 1200);
 
-  function update(dt){
-    accDot  += dt;
-    accStep += dt;
-
-    if (accDot >= DOT_MS){
-      accDot = 0;
-      dots = (dots + 1) % 4;
-      say(steps[step] + '.'.repeat(dots));
-    }
-    if (accStep >= STEP_MS){
-      accStep = 0; dots = 0;
-      step = (step + 1) % steps.length;
-      say(steps[step]);
-    }
-  }
-
-  // rAF loop (ถ้า ts ไม่ได้มา ให้ใช้ Date.now())
-  function rafLoop(ts){
-    if (!uiAlive) return;
-    if (typeof ts !== 'number') ts = performance.now ? performance.now() : Date.now();
-    if (!last) last = ts;
-    const dt = ts - last; last = ts;
-    if (dt >= 0) update(dt);
-    requestAnimationFrame(rafLoop);
-  }
-  requestAnimationFrame(rafLoop);
-
-  // fallback: กันกรณี rAF โดน throttle แรงมาก
-  (function timeoutLoop(){
-    if (!uiAlive) return;
-    update(300);
-    setTimeout(timeoutLoop, 300);
-  })();
-
-  const stopUI = ()=>{ uiAlive=false; };
+  const stopUI = ()=>{ try{ clearInterval(dotTimer); clearInterval(stepTimer); }catch(_){} };
   addEventListener('pagehide', stopUI);
   addEventListener('beforeunload', stopUI);
 
-  /* ---------- Redirect helper (ยิงเผื่อเผื่อค้าง) ---------- */
+  /* ---------- redirect helper: ยิงซ้ำกันค้าง ---------- */
   function jump(url){
-    let done=false;
-    const go=()=>{ if(!done){ done=true; location.replace(url); } };
-    go(); setTimeout(go, 200); setTimeout(go, 1200);
+    let fired = false;
+    const go = ()=>{ if(!fired){ fired = true; location.replace(url); } };
+    go(); setTimeout(go, 200); setTimeout(go, 900);
   }
 
-  /* ---------- LIFF boot: เร็ว + ไม่บล็อก UI ---------- */
-  async function bootWithLIFF(){
-    // รอ SDK โผล่สูงสุด ~3s
-    let tries=0;
-    while(!window.liff && tries<60){ await new Promise(r=>setTimeout(r,50)); tries++; }
-    if (!window.liff){ say("ไม่สามารถโหลด LIFF ได้"); return setTimeout(()=>location.replace(WP_BASE), 1200); }
+  /* ---------- LIFF boot (รอ SDK สูงสุด ~3s, ได้ token ปุ๊บพุ่งทันที) ---------- */
+  async function boot(){
+    // รอให้ SDK มา
+    let wait = 0;
+    while (!window.liff && wait < 60) { await new Promise(r=>setTimeout(r,50)); wait++; }
+    if (!window.liff) { say("ไม่สามารถโหลด LIFF ได้"); return setTimeout(()=>location.replace(WP_BASE), 1200); }
 
     try{
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
 
       if (!liff.isLoggedIn()){
+        // กลับเข้าหน้านี้ต่อ flow
         liff.login({ redirectUri: location.href });
         return;
       }
 
-      // ดึง id_token แบบไว
-      let token = liff.getIDToken();
-      let t=0;
-      while(!token && t<20){ await new Promise(r=>setTimeout(r,75)); token = liff.getIDToken(); t++; }
-      if (!token){ liff.login({ redirectUri: location.href }); return; }
+      // บางเครื่อง token มาช้า → รอสั้น ๆ แต่ไม่บล็อก UI
+      let idToken = liff.getIDToken();
+      let tries = 0;
+      while (!idToken && tries < 20) { await new Promise(r=>setTimeout(r,75)); idToken = liff.getIDToken(); tries++; }
 
-      const target = `${WP_BASE}/wp-admin/admin-post.php?action=ec_liff_sso&id_token=${encodeURIComponent(token)}&redir=${encodeURIComponent(REDIRECT_TO)}`;
+      if (!idToken) {
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+
+      const target = `${WP_BASE}/wp-admin/admin-post.php?action=ec_liff_sso`
+                   + `&id_token=${encodeURIComponent(idToken)}`
+                   + `&redir=${encodeURIComponent(REDIRECT_TO)}`;
       jump(target); // พุ่งเลย ไม่รอข้อความ
     }catch(err){
       console.error('[LIFF]', err);
-      say('เกิดข้อผิดพลาดในการเชื่อมต่อ…');
+      say("เกิดข้อผิดพลาดในการเชื่อมต่อ…");
       setTimeout(()=>location.replace(WP_BASE), 1500);
     }
   }
 
-  // เริ่มทันทีที่ DOM พร้อม
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', bootWithLIFF, { once:true });
+  // เริ่มเร็วที่สุดเท่าที่ DOM พร้อม
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once:true });
   } else {
-    bootWithLIFF();
+    boot();
   }
 })();
 </script>
