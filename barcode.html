@@ -10,27 +10,24 @@
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-<style>
+  <style>
     :root{ --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
 
     html, body {height:100%;margin:0;overflow-x:hidden;display:flex;flex-direction:column;background:#fff;color:var(--ink);}
     main {flex:1;display:flex;justify-content:center;align-items:center;padding:10px;}
     .wrap {width:100%;max-width:720px;}
-    .logo {width:100px;max-width:30%;margin:0 auto;height:auto;display:block;padding:30px 0 0;}
 
     .hero{text-align:center;margin-bottom:20px}
-    .header{font-size:2.7em;font-weight:600;color:#91C65E;line-height:1.0;margin:0px 0 0;text-align:center;justify-content:center;align-items:center;}
-    .subtext{font-size:15px;font-weight:500;color:#666;margin:0px;text-align:center;justify-content:center;align-items:center;}
-    .hero p.lead{margin:0;color:#666;font-weight:400}
-    .hero img{max-width:100%;height:auto;display:block;margin:12px auto}
+    .header{font-size:2.2rem;font-weight:600;color:#91C65E;line-height:1.0;margin:0 0 4px;text-align:center;}
+    .subtext{font-size:15px;font-weight:500;color:#666;margin:0;text-align:center;}
 
-    .card{background:var(--card);border-radius:16px;padding:5px;margin-top:10px;}
+    .card{background:var(--card);border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 6px 24px rgba(2,6,23,.06)}
     .bc-group{display:flex;width:100%}
     .bc-prefix,.bc-tail{font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1;min-width:0}
     .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;background:#f3f4f6;color:#6b7280;border-radius:10px 0 0 10px;pointer-events:none;user-select:none}
     .bc-tail{text-align:center;border-radius:0 10px 10px 0}
-    .bc-tail:focus{border-color:var(--brand);box-shadow:0 0 0 0px rgba(145,198,94,.25)}
+    .bc-tail:focus{box-shadow:0 0 0 2px rgba(145,198,94,.25)}
 
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
     .btn{font-size:16px;padding:.58em 1.2em;border-radius:50px;border:0;cursor:pointer;flex:1;max-width:100%}
@@ -45,11 +42,8 @@
   </style>
 </head>
 <body>
-
   <main>
     <div class="wrap">
-
-
       <p class="header">REGISTRATION</p>
       <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
 
@@ -58,12 +52,12 @@
         <section class="hero">
           <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
                alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
-          <p class="lead">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
+          <p class="lead" style="margin:8px 0;color:#666;font-weight:400">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
         </section>
 
         <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
           <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true">
-          <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159">
+          <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
         </div>
 
         <div class="actions"><button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button></div>
@@ -79,10 +73,13 @@
   <script>
   (async function(){
     'use strict';
-    const LIFF_ID      = '2008100293-1xx32BzA';
-    const REGISTER_URL = 'https://www.eazycare.in.th/การรับประกัน/';
-    const API_URL      = 'https://www.eazycare.in.th/wp-json/eazycare/v1/product-lookup?code=';
+    /* ==================== CONFIG ==================== */
+    const LIFF_ID       = '2008100293-1xx32BzA';                 // 🔧 แก้เป็นของจริงถ้าจำเป็น
+    const WP_ORIGIN     = 'https://www.eazycare.in.th';           // โดเมน WordPress (ใช้สำหรับ SSO bridge)
+    const REGISTER_URL  = WP_ORIGIN + '/การรับประกัน/';          // หน้าแบบฟอร์ม Elementor
+    const API_URL       = WP_ORIGIN + '/wp-json/eazycare/v1/product-lookup?code=';
 
+    /* ==================== Helpers ==================== */
     const $ = (s,r=document)=>r.querySelector(s);
     const elPrefix=$('#bc-prefix'), elTail3=$('#bc-tail'), elMsg=$('#bc-msg');
     const btnOk=$('#btn-ok'), btnSkip=$('#btn-skip');
@@ -91,24 +88,41 @@
     const setMsg=(t,ok)=>{elMsg.className='msg '+(ok?'ok':'err');elMsg.textContent=t||'';};
 
     function b64urlEncodeJson(obj){
-      try{const json=JSON.stringify(obj);
+      try{
+        const json=JSON.stringify(obj);
         const b64=btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p)));
         return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-      }catch(_){return '';}
+      }catch(_){return ''}
     }
 
-    // === ดึง email จาก LIFF ===
-    let ecUser=null;
+    function buildSsoUrl(idToken, redirUrl){
+      const sso = new URL('/wp-admin/admin-post.php', WP_ORIGIN);
+      sso.searchParams.set('action','ec_liff_sso');
+      sso.searchParams.set('redir', redirUrl);
+      if (idToken) sso.searchParams.set('id_token', idToken);
+      return sso.toString();
+    }
+
+    async function lookup(code13){
+      const res=await fetch(API_URL+encodeURIComponent(code13),{method:'GET',mode:'cors',credentials:'omit'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }
+
+    /* ==================== LIFF Init (get email/id_token) ==================== */
+    let ecUser=null, idToken=null;
     try{
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
       if(!liff.isLoggedIn()){ liff.login({ redirectUri: location.href }); return; }
-      const dec=liff.getDecodedIDToken && liff.getDecodedIDToken();
-      ecUser = { email: dec?.email || '' }; // ✅ เก็บเฉพาะ email
+      idToken = (liff.getIDToken && liff.getIDToken()) || '';
+      const dec = liff.getDecodedIDToken && liff.getDecodedIDToken();
+      ecUser = { email: dec?.email || '' };
     }catch(e){ console.warn('LIFF unavailable', e); }
 
+    /* ==================== Input behaviors ==================== */
     function onInput(){
       let d=onlyDigits(elTail3.value);
-      if(d.length>3)d=d.slice(-3);
+      if(d.length>3) d=d.slice(-3);
       elTail3.value=d;
       btnOk.disabled=(d.length!==3);
       setMsg('',true);
@@ -117,51 +131,62 @@
     elTail3.addEventListener('keyup',e=>{if(e.key==='Enter'&&!btnOk.disabled)btnOk.click();});
     onInput();
 
-    async function lookup(code13){
-      const res=await fetch(API_URL+encodeURIComponent(code13),{method:'GET',mode:'cors',credentials:'omit'});
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      return res.json();
-    }
-
+    /* ==================== Main actions ==================== */
     btnOk.addEventListener('click',async()=>{
       const tail3=onlyDigits(elTail3.value);
       if(tail3.length!==3){setMsg('ต้องกรอกให้ครบ 3 หลัก',false);return;}
       const full13=BARCODE_PREFIX+tail3;
       btnOk.disabled=true;
 
-      const msgSteps=[
-        {text:'กำลังตรวจสอบบาร์โค้ด...',delay:0},
-        {text:'กำลังดึงข้อมูลระบบสินค้า...',delay:1500},
-        {text:'กำลังตรวจสอบสินค้า...',delay:3000}
+      const steps=[
+        {t:'กำลังตรวจสอบบาร์โค้ด...',ms:0},
+        {t:'กำลังดึงข้อมูลระบบสินค้า...',ms:1200},
+        {t:'กำลังตรวจสอบสินค้า...',ms:2400}
       ];
-      msgSteps.forEach(s=>setTimeout(()=>setMsg(s.text,true),s.delay));
+      steps.forEach(s=>setTimeout(()=>setMsg(s.t,true),s.ms));
 
       try{
         const data=await lookup(full13);
-        if(data&&data.ok&&!data.not_found&&data.product_name){
-          setTimeout(()=>{setMsg('พบสินค้าแล้ว: '+data.product_name,true);},4500);
-          const payload={product:{
-            product_name:data.product_name,
-            category_base:data.category_base||'',
-            system:data.system||'',
-            category:data.category||''
-          },...(ecUser?{user:ecUser}:{})};
+        if(data && data.ok && !data.not_found && data.product_name){
+          setTimeout(()=>{setMsg('พบสินค้าแล้ว: '+data.product_name,true);},3600);
+          const payload={
+            product:{
+              product_name:data.product_name,
+              category_base:data.category_base||'',
+              system:data.system||'',
+              category:data.category||''
+            },
+            ...(ecUser?{user:ecUser}:{})
+          };
           const ecp=b64urlEncodeJson(payload);
-          const url=new URL(REGISTER_URL);url.searchParams.set('ecp',ecp);
-          setTimeout(()=>{location.href=url.toString();},5000);
+          const registerUrl=new URL(REGISTER_URL); registerUrl.searchParams.set('ecp',ecp);
+
+          // ✅ ไป SSO bridge ก่อนเสมอ ถ้ามี id_token เพื่อให้ WP ตั้งคุกกี้ แล้วค่อยเด้งเข้าแบบฟอร์ม
+          if(idToken){
+            const ssoUrl = buildSsoUrl(idToken, registerUrl.toString());
+            setTimeout(()=>{ location.href = ssoUrl; }, 4200);
+          }else{
+            // ถ้าไม่มี id_token (เช่น เปิดนอก LINE) ก็เข้าฟอร์มตรง ๆ และให้กันตกที่ปลายทางดูแล
+            setTimeout(()=>{ location.href = registerUrl.toString(); }, 4200);
+          }
         }else{
-          setTimeout(()=>{setMsg('ไม่พบสินค้า กรุณาตรวจสอบเลขอีกครั้ง หรือกด "ข้าม"',false);btnOk.disabled=false;},4000);
+          setTimeout(()=>{setMsg('ไม่พบสินค้า กรุณาตรวจสอบเลขอีกครั้ง หรือกด "ข้าม"',false);btnOk.disabled=false;},3200);
         }
       }catch(e){
         console.error(e);
-        setTimeout(()=>{setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”',false);btnOk.disabled=false;},3500);
+        setTimeout(()=>{setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”',false);btnOk.disabled=false;},3000);
       }
     });
 
     btnSkip.addEventListener('click',()=>{
-      const url=new URL(REGISTER_URL);
-      if(ecUser){const ecp=b64urlEncodeJson({user:ecUser});url.searchParams.set('ecp',ecp);}
-      location.href=url.toString();
+      const registerUrl=new URL(REGISTER_URL);
+      if(ecUser){ const ecp=b64urlEncodeJson({user:ecUser}); registerUrl.searchParams.set('ecp',ecp); }
+      if(idToken){
+        const ssoUrl = buildSsoUrl(idToken, registerUrl.toString());
+        location.href = ssoUrl;
+      }else{
+        location.href = registerUrl.toString();
+      }
     });
   })();
   </script>
