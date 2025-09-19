@@ -58,7 +58,7 @@
   const $msg = () => document.getElementById('msg');
   const say  = t => { const el=$msg(); if (el) el.textContent=t; };
 
-  /* ---------- 1) ข้อความหมุนเวียน: rAF loop (ไม่โดน throttle) ---------- */
+  /* ---------- ข้อความหมุนเวียน: hybrid ticker (rAF + setTimeout fallback) ---------- */
   const steps = [
     "กำลังเชื่อมต่อระบบเว็บไซต์",
     "กำลังตรวจสอบข้อมูลกับ LINE",
@@ -66,54 +66,62 @@
     "เตรียมพาไปยังหน้าข้อมูลประกัน"
   ];
   let step = 0, dots = 0;
-  let lastTick = 0;
-  const STEP_MS = 1000;   // เปลี่ยนข้อความทุก 1.4s
-  const DOT_MS  = 200;    // เพิ่มจุดทุก 0.35s
-  let accStep = 0, accDot = 0;
+  let last = 0, accStep = 0, accDot = 0;
+  const STEP_MS = 1400;
+  const DOT_MS  = 350;
   let uiAlive = true;
 
-  // แสดงทันทีตั้งแต่เริ่ม (ไม่รอเฟรมแรก)
+  // แสดงทันทีตั้งแต่เริ่ม
   say(steps[0] + '.');
 
-  function uiLoop(ts){
-    if (!uiAlive) return;
-    if (!lastTick) lastTick = ts;
-    const dt = ts - lastTick; lastTick = ts;
-
-    accStep += dt; accDot += dt;
+  function update(dt){
+    accDot  += dt;
+    accStep += dt;
 
     if (accDot >= DOT_MS){
       accDot = 0;
       dots = (dots + 1) % 4;
-      // update ทุกรอบจุด เพื่อให้เห็นว่ามีชีวิต
       say(steps[step] + '.'.repeat(dots));
     }
     if (accStep >= STEP_MS){
-      accStep = 0;
+      accStep = 0; dots = 0;
       step = (step + 1) % steps.length;
-      dots = 0;
       say(steps[step]);
     }
-    requestAnimationFrame(uiLoop);
   }
-  requestAnimationFrame(uiLoop);
+
+  // rAF loop (ถ้า ts ไม่ได้มา ให้ใช้ Date.now())
+  function rafLoop(ts){
+    if (!uiAlive) return;
+    if (typeof ts !== 'number') ts = performance.now ? performance.now() : Date.now();
+    if (!last) last = ts;
+    const dt = ts - last; last = ts;
+    if (dt >= 0) update(dt);
+    requestAnimationFrame(rafLoop);
+  }
+  requestAnimationFrame(rafLoop);
+
+  // fallback: กันกรณี rAF โดน throttle แรงมาก
+  (function timeoutLoop(){
+    if (!uiAlive) return;
+    update(300);
+    setTimeout(timeoutLoop, 300);
+  })();
 
   const stopUI = ()=>{ uiAlive=false; };
   addEventListener('pagehide', stopUI);
   addEventListener('beforeunload', stopUI);
 
-  /* ---------- 2) Redirect helper (ยิงเผื่อเผื่อค้าง) ---------- */
+  /* ---------- Redirect helper (ยิงเผื่อเผื่อค้าง) ---------- */
   function jump(url){
     let done=false;
     const go=()=>{ if(!done){ done=true; location.replace(url); } };
-    go();                    // ทันที
-    setTimeout(go, 200);     // เผื่อ
-    setTimeout(go, 1200);    // เผื่ออีกชั้น
+    go(); setTimeout(go, 200); setTimeout(go, 1200);
   }
 
-  /* ---------- 3) LIFF boot: เร็ว + ไม่บล็อก UI ---------- */
+  /* ---------- LIFF boot: เร็ว + ไม่บล็อก UI ---------- */
   async function bootWithLIFF(){
-    // รอให้ SDK โผล่ (สูงสุด ~3s)
+    // รอ SDK โผล่สูงสุด ~3s
     let tries=0;
     while(!window.liff && tries<60){ await new Promise(r=>setTimeout(r,50)); tries++; }
     if (!window.liff){ say("ไม่สามารถโหลด LIFF ได้"); return setTimeout(()=>location.replace(WP_BASE), 1200); }
@@ -122,12 +130,11 @@
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
 
       if (!liff.isLoggedIn()){
-        // ให้ LINE ทำ login แล้วกลับมา
         liff.login({ redirectUri: location.href });
         return;
       }
 
-      // Poll เอา id_token แบบไว (ไม่ขวาง rAF loop)
+      // ดึง id_token แบบไว
       let token = liff.getIDToken();
       let t=0;
       while(!token && t<20){ await new Promise(r=>setTimeout(r,75)); token = liff.getIDToken(); t++; }
@@ -142,7 +149,7 @@
     }
   }
 
-  // เริ่มทันทีที่ DOM พร้อม (ไม่รอ window.onload)
+  // เริ่มทันทีที่ DOM พร้อม
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', bootWithLIFF, { once:true });
   } else {
