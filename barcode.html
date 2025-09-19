@@ -10,6 +10,7 @@
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
+
   <style>
     :root{ --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
@@ -19,10 +20,22 @@
     .wrap {width:100%;max-width:720px;}
 
     .hero{text-align:center;margin-bottom:20px}
-    .header{font-size:2.2rem;font-weight:600;color:#91C65E;line-height:1.0;margin:0 0 4px;text-align:center;}
-    .subtext{font-size:15px;font-weight:500;color:#666;margin:0;text-align:center;}
+    .header{font-size:2.2rem;font-weight:600;color:#91C65E;line-height:1.0;margin:30px 0 0;text-align:center;}
+    .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 30px;text-align:center;}
 
-    .card{background:var(--card);border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 6px 24px rgba(2,6,23,.06)}
+    .card{background:var(--card);border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 6px 24px rgba(2,6,23,.06);overflow:hidden;}
+
+    /* ✅ ป้องกันรูปภาพล้นการ์ดทุกกรณี */
+    img{max-width:100%;height:auto;}
+.hero img{
+  display:block;        /* ทำให้จัด margin ได้ */
+  width:80%;            /* ใช้สัดส่วนที่คุณต้องการ */
+  height:auto;
+  max-width:100%;
+  margin:0 auto;        /* ✅ บังคับกึ่งกลางแนวนอน */
+}
+
+
     .bc-group{display:flex;width:100%}
     .bc-prefix,.bc-tail{font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1;min-width:0}
     .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;background:#f3f4f6;color:#6b7280;border-radius:10px 0 0 10px;pointer-events:none;user-select:none}
@@ -44,15 +57,19 @@
 <body>
   <main>
     <div class="wrap">
-      <p class="header">REGISTRATION</p>
-      <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
 
       <!-- การ์ดฟอร์ม -->
       <section class="card" aria-label="ฟอร์มบาร์โค้ด">
+            <p class="header">REGISTRATION</p>
+      <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
+
         <section class="hero">
+          <!-- ❌ ลบ width/height ตายตัวออก และปล่อยให้ CSS คุมขนาด -->
           <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
-               alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" width="412" height="136" loading="lazy">
-          <p class="lead" style="margin:8px 0;color:#666;font-weight:400">กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด</p>
+               alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" loading="lazy">
+          <p class="lead" style="margin:8px 0;color:#666;font-weight:400">
+            กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด
+          </p>
         </section>
 
         <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
