@@ -16,24 +16,24 @@
   <!-- ฟอนต์ -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- LIFF SDK (async; มี fallback โค้ดรอให้เอง) -->
+  <!-- LIFF SDK (async) -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" async></script>
 
   <style>
     :root { --brand:#91C65E; --muted:#6b7280; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
-    body {margin:0; background:#fff; color:#111; display:flex; flex-direction:column; min-height:100vh;}
-    main {flex:1; display:flex; align-items:center; justify-content:center; padding:20px;}
+    body {margin:0;background:#fff;color:#111;display:flex;flex-direction:column;min-height:100vh}
+    main {flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
     #wrap {max-width:420px;width:100%;text-align:center}
     .logo {width:120px;margin:0 auto 20px;display:block}
     h3 {font-size:22px;font-weight:600;margin:0 0 8px;color:var(--brand)}
     #msg {color:var(--muted);font-size:15px;margin:0 0 16px;min-height:22px}
     .loading {display:flex;justify-content:center;gap:6px;margin:14px auto}
-    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;animation:bounce 1.2s infinite ease-in-out;}
+    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;animation:bounce 1.2s infinite ease-in-out}
     .dot:nth-child(2){animation-delay:0.2s}
     .dot:nth-child(3){animation-delay:0.4s}
-    @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.6} 40%{transform:scale(1);opacity:1} }
-    footer {text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.6}40%{transform:scale(1);opacity:1}}
+    footer {text-align:center;color:#fff;background:#91C65E;font-size:12px;padding:12px}
   </style>
 </head>
 <body>
@@ -48,12 +48,6 @@
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
 <script>
-/**
- * Ultra-fast LIFF SSO
- * - ข้อความหมุนเวียนเริ่มทันที (ไม่พึ่ง SDK)
- * - ได้ id_token แล้ว → redirect ทันที (ไม่รอ UI)
- * - watchdog ยิงซ้ำป้องกันเบราว์เซอร์นิ่ง
- */
 (function(){
   'use strict';
 
@@ -64,7 +58,7 @@
   const $msg = () => document.getElementById('msg');
   const say  = t => { const el=$msg(); if (el) el.textContent=t; };
 
-  /* 1) ข้อความหมุนเวียน: เริ่มทันที */
+  /* ---------- 1) ข้อความหมุนเวียน: rAF loop (ไม่โดน throttle) ---------- */
   const steps = [
     "กำลังเชื่อมต่อระบบเว็บไซต์",
     "กำลังตรวจสอบข้อมูลกับ LINE",
@@ -72,60 +66,85 @@
     "เตรียมพาไปยังหน้าข้อมูลประกัน"
   ];
   let step = 0, dots = 0;
-  const uiTimer = setInterval(()=>{
-    dots = (dots + 1) % 4;
-    if (dots === 0) step = (step + 1) % steps.length;
-    say(steps[step] + '.'.repeat(dots));
-  }, 450);
-  const stopUI = ()=>{ try{ clearInterval(uiTimer); }catch(_){} };
+  let lastTick = 0;
+  const STEP_MS = 1400;   // เปลี่ยนข้อความทุก 1.4s
+  const DOT_MS  = 350;    // เพิ่มจุดทุก 0.35s
+  let accStep = 0, accDot = 0;
+  let uiAlive = true;
+
+  // แสดงทันทีตั้งแต่เริ่ม (ไม่รอเฟรมแรก)
+  say(steps[0] + '.');
+
+  function uiLoop(ts){
+    if (!uiAlive) return;
+    if (!lastTick) lastTick = ts;
+    const dt = ts - lastTick; lastTick = ts;
+
+    accStep += dt; accDot += dt;
+
+    if (accDot >= DOT_MS){
+      accDot = 0;
+      dots = (dots + 1) % 4;
+      // update ทุกรอบจุด เพื่อให้เห็นว่ามีชีวิต
+      say(steps[step] + '.'.repeat(dots));
+    }
+    if (accStep >= STEP_MS){
+      accStep = 0;
+      step = (step + 1) % steps.length;
+      dots = 0;
+      say(steps[step]);
+    }
+    requestAnimationFrame(uiLoop);
+  }
+  requestAnimationFrame(uiLoop);
+
+  const stopUI = ()=>{ uiAlive=false; };
   addEventListener('pagehide', stopUI);
   addEventListener('beforeunload', stopUI);
 
-  /* 2) ฟังก์ชัน redirect แบบยิงเผื่อ */
+  /* ---------- 2) Redirect helper (ยิงเผื่อเผื่อค้าง) ---------- */
   function jump(url){
     let done=false;
     const go=()=>{ if(!done){ done=true; location.replace(url); } };
-    go();                      // ยิงทันที
-    setTimeout(go, 200);       // สำรอง
-    setTimeout(go, 1200);      // สำรองอีกชั้น
+    go();                    // ทันที
+    setTimeout(go, 200);     // เผื่อ
+    setTimeout(go, 1200);    // เผื่ออีกชั้น
   }
 
-  /* 3) รอให้ LIFF SDK โผล่ (เพราะเรา async) แล้ว init → token → redirect */
+  /* ---------- 3) LIFF boot: เร็ว + ไม่บล็อก UI ---------- */
   async function bootWithLIFF(){
-    // Poll จนกว่าจะมี window.liff (สูงสุด ~3วินาที)
+    // รอให้ SDK โผล่ (สูงสุด ~3s)
     let tries=0;
     while(!window.liff && tries<60){ await new Promise(r=>setTimeout(r,50)); tries++; }
-    if (!window.liff){ say("ไม่สามารถโหลด LIFF ได้"); setTimeout(()=>location.replace(WP_BASE), 1500); return; }
+    if (!window.liff){ say("ไม่สามารถโหลด LIFF ได้"); return setTimeout(()=>location.replace(WP_BASE), 1200); }
 
     try{
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
 
       if (!liff.isLoggedIn()){
-        // ให้ LINE จัดการ login แล้วกลับมาหน้านี้
+        // ให้ LINE ทำ login แล้วกลับมา
         liff.login({ redirectUri: location.href });
         return;
       }
 
-      // ดึง id_token แบบรวดเร็ว (poll สั้น ๆ เผื่อดีเลย์)
+      // Poll เอา id_token แบบไว (ไม่ขวาง rAF loop)
       let token = liff.getIDToken();
       let t=0;
       while(!token && t<20){ await new Promise(r=>setTimeout(r,75)); token = liff.getIDToken(); t++; }
       if (!token){ liff.login({ redirectUri: location.href }); return; }
 
-      // ได้ token แล้ว สร้าง URL แล้ว “พุ่งเลย”
       const target = `${WP_BASE}/wp-admin/admin-post.php?action=ec_liff_sso&id_token=${encodeURIComponent(token)}&redir=${encodeURIComponent(REDIRECT_TO)}`;
-      jump(target);
-
+      jump(target); // พุ่งเลย ไม่รอข้อความ
     }catch(err){
       console.error('[LIFF]', err);
-      say('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่…');
-      setTimeout(()=>location.replace(WP_BASE), 2000);
+      say('เกิดข้อผิดพลาดในการเชื่อมต่อ…');
+      setTimeout(()=>location.replace(WP_BASE), 1500);
     }
   }
 
-  // เริ่มทันทีหลัง DOM พร้อม โดยไม่รอ onload
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootWithLIFF, {once:true});
+  // เริ่มทันทีที่ DOM พร้อม (ไม่รอ window.onload)
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bootWithLIFF, { once:true });
   } else {
     bootWithLIFF();
   }
