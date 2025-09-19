@@ -16,8 +16,8 @@
   <!-- ฟอนต์ -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- LIFF SDK (โหลดครั้งเดียว + defer) -->
-  <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- LIFF SDK (async; มี fallback โค้ดรอให้เอง) -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js" async></script>
 
   <style>
     :root { --brand:#91C65E; --muted:#6b7280; }
@@ -25,133 +25,110 @@
     body {margin:0; background:#fff; color:#111; display:flex; flex-direction:column; min-height:100vh;}
     main {flex:1; display:flex; align-items:center; justify-content:center; padding:20px;}
     #wrap {max-width:420px;width:100%;text-align:center}
-
     .logo {width:120px;margin:0 auto 20px;display:block}
     h3 {font-size:22px;font-weight:600;margin:0 0 8px;color:var(--brand)}
     #msg {color:var(--muted);font-size:15px;margin:0 0 16px;min-height:22px}
-
     .loading {display:flex;justify-content:center;gap:6px;margin:14px auto}
-    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;
-      animation:bounce 1.2s infinite ease-in-out;}
+    .dot {width:10px;height:10px;background:var(--brand);border-radius:50%;animation:bounce 1.2s infinite ease-in-out;}
     .dot:nth-child(2){animation-delay:0.2s}
     .dot:nth-child(3){animation-delay:0.4s}
-    @keyframes bounce {
-      0%,80%,100%{transform:scale(0.6);opacity:0.6}
-      40%{transform:scale(1);opacity:1}
-    }
-
+    @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.6} 40%{transform:scale(1);opacity:1} }
     footer {text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
   </style>
 </head>
 <body>
   <main>
     <div id="wrap">
-      <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png"
-           alt="EazyCare" class="logo">
-
+      <img src="https://www.eazycare.in.th/wp-content/uploads/2024/04/cropped-Eazy-Care-1.png" alt="EazyCare" class="logo">
       <h3>กำลังเข้าสู่ระบบ…</h3>
       <p id="msg">กำลังเริ่มต้นระบบ</p>
-
-      <div class="loading" aria-hidden="true">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-      </div>
+      <div class="loading" aria-hidden="true"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
     </div>
   </main>
-
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
-<script defer>
+<script>
 /**
- * เวอร์ชันเร่งความเร็ว:
- * - แสดงข้อความหมุนเวียนแบบ non-blocking
- * - ได้ id_token ปุ๊บ → location.replace() ทันที (ไม่รอข้อความ “สำเร็จ”)
- * - มี watchdog บังคับรีไดเรกต์ซ้ำอีกชั้นถ้าเบราว์เซอร์นิ่ง
+ * Ultra-fast LIFF SSO
+ * - ข้อความหมุนเวียนเริ่มทันที (ไม่พึ่ง SDK)
+ * - ได้ id_token แล้ว → redirect ทันที (ไม่รอ UI)
+ * - watchdog ยิงซ้ำป้องกันเบราว์เซอร์นิ่ง
  */
 (function(){
   'use strict';
 
-  const LIFF_ID      = "2008100293-QNl6ParD";
-  const WP_BASE      = "https://www.eazycare.in.th";
-  const REDIRECT_TO  = "/check-warranty/";
+  const LIFF_ID     = "2008100293-QNl6ParD";
+  const WP_BASE     = "https://www.eazycare.in.th";
+  const REDIRECT_TO = "/check-warranty/";
 
   const $msg = () => document.getElementById('msg');
-  const say  = t => { const el=$msg(); if (el) el.textContent = t; };
+  const say  = t => { const el=$msg(); if (el) el.textContent=t; };
 
-  // ข้อความหมุนเวียน (เพื่อ UX เท่านั้น ไม่บล็อกงานจริง)
+  /* 1) ข้อความหมุนเวียน: เริ่มทันที */
   const steps = [
     "กำลังเชื่อมต่อระบบเว็บไซต์",
     "กำลังตรวจสอบข้อมูลกับ LINE",
     "กำลังสร้างเซสชันเข้าสู่ระบบ",
     "เตรียมพาไปยังหน้าข้อมูลประกัน"
   ];
-  let stepIdx = 0;
-  let dots = 0;
+  let step = 0, dots = 0;
   const uiTimer = setInterval(()=>{
     dots = (dots + 1) % 4;
-    stepIdx = (stepIdx + (dots===0?1:0)) % steps.length;
-    say(steps[stepIdx] + '.'.repeat(dots));
-  }, 500);
-
-  // บังคับเคลียร์ UI เมื่อออกจากหน้า
+    if (dots === 0) step = (step + 1) % steps.length;
+    say(steps[step] + '.'.repeat(dots));
+  }, 450);
   const stopUI = ()=>{ try{ clearInterval(uiTimer); }catch(_){} };
-  window.addEventListener('pagehide', stopUI);
-  window.addEventListener('beforeunload', stopUI);
+  addEventListener('pagehide', stopUI);
+  addEventListener('beforeunload', stopUI);
 
-  // เริ่มทำงาน LIFF ทันทีที่ SDK โหลดเสร็จ (script นี้ defer ตาม SDK)
-  const boot = async () => {
-    try {
-      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+  /* 2) ฟังก์ชัน redirect แบบยิงเผื่อ */
+  function jump(url){
+    let done=false;
+    const go=()=>{ if(!done){ done=true; location.replace(url); } };
+    go();                      // ยิงทันที
+    setTimeout(go, 200);       // สำรอง
+    setTimeout(go, 1200);      // สำรองอีกชั้น
+  }
 
-      if (!liff.isLoggedIn()) {
-        // ส่งกลับที่เดิมเพื่อ flow ต่อเนื่อง
+  /* 3) รอให้ LIFF SDK โผล่ (เพราะเรา async) แล้ว init → token → redirect */
+  async function bootWithLIFF(){
+    // Poll จนกว่าจะมี window.liff (สูงสุด ~3วินาที)
+    let tries=0;
+    while(!window.liff && tries<60){ await new Promise(r=>setTimeout(r,50)); tries++; }
+    if (!window.liff){ say("ไม่สามารถโหลด LIFF ได้"); setTimeout(()=>location.replace(WP_BASE), 1500); return; }
+
+    try{
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
+
+      if (!liff.isLoggedIn()){
+        // ให้ LINE จัดการ login แล้วกลับมาหน้านี้
         liff.login({ redirectUri: location.href });
         return;
       }
 
-      // บางเครื่อง token มาช้า → ลองรอแบบสั้น ๆ (ไม่เกิน ~1.5s)
-      let idToken = liff.getIDToken();
-      let tries = 0;
-      while (!idToken && tries < 15) {
-        await new Promise(r=>setTimeout(r,100));
-        idToken = liff.getIDToken();
-        tries++;
-      }
+      // ดึง id_token แบบรวดเร็ว (poll สั้น ๆ เผื่อดีเลย์)
+      let token = liff.getIDToken();
+      let t=0;
+      while(!token && t<20){ await new Promise(r=>setTimeout(r,75)); token = liff.getIDToken(); t++; }
+      if (!token){ liff.login({ redirectUri: location.href }); return; }
 
-      if (!idToken) {
-        // ถ้าไม่มีจริง ๆ ให้ลองสั่ง login ใหม่แบบเงียบ
-        liff.login({ redirectUri: location.href });
-        return;
-      }
+      // ได้ token แล้ว สร้าง URL แล้ว “พุ่งเลย”
+      const target = `${WP_BASE}/wp-admin/admin-post.php?action=ec_liff_sso&id_token=${encodeURIComponent(token)}&redir=${encodeURIComponent(REDIRECT_TO)}`;
+      jump(target);
 
-      // ได้ token แล้ว → รีไดเรกต์ “ทันที” (งานหนักให้ WP ทำต่อ)
-      const target = WP_BASE + '/wp-admin/admin-post.php'
-                   + '?action=ec_liff_sso'
-                   + '&id_token=' + encodeURIComponent(idToken)
-                   + '&redir='    + encodeURIComponent(REDIRECT_TO);
-
-      // Watchdog: ถ้า replace ไม่วิ่ง (เช่น บราว์เซอร์กด back เร็ว ๆ) ให้ยิงซ้ำอัตโนมัติ
-      let jumped = false;
-      const forceJump = () => {
-        if (!jumped) { jumped = true; location.replace(target); }
-      };
-      // ยิงทันที 1 ครั้ง
-      forceJump();
-      // แล้วยิงสำรองอีก 2 จังหวะ
-      setTimeout(forceJump, 300);
-      setTimeout(forceJump, 1200);
-
-    } catch (err) {
-      console.error('[SSO] LIFF error:', err);
-      say('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่');
-      // เผื่อไว้: กลับไปโฮมเพจหลัง 2 วิ
-      setTimeout(()=>{ location.replace(WP_BASE); }, 2000);
+    }catch(err){
+      console.error('[LIFF]', err);
+      say('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่…');
+      setTimeout(()=>location.replace(WP_BASE), 2000);
     }
-  };
+  }
 
-  // ถ้า SDK ยังไม่พร้อม ให้รอ event ‘load’ แล้วค่อย boot
-  if (window.liff) boot();
-  else window.addEventListener('load', boot, { once:true });
-
+  // เริ่มทันทีหลัง DOM พร้อม โดยไม่รอ onload
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootWithLIFF, {once:true});
+  } else {
+    bootWithLIFF();
+  }
 })();
 </script>
 </body>
