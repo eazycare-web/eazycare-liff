@@ -9,12 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
+  <!-- Quagga2 -->
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
 
   <style>
     :root{ --brand:#91C65E; --brand-dark:#7DB14F; --ink:#0f172a; --muted:#6b7280; --card:#ffffff; }
     *{box-sizing:border-box;font-family:'Prompt',sans-serif}
-
     html, body {height:100%;margin:0;overflow-x:hidden;display:flex;flex-direction:column;background:#fff;color:var(--ink);}
     main {flex:1;display:flex;justify-content:center;align-items:center;padding:10px;}
     .wrap {width:100%;max-width:720px;}
@@ -24,23 +24,21 @@
     .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 30px;text-align:center;}
 
     .card{background:var(--card);border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 6px 24px rgba(2,6,23,.06);overflow:hidden;}
-
-    /* ✅ ป้องกันรูปภาพล้นการ์ดทุกกรณี */
     img{max-width:100%;height:auto;}
-.hero img{
-  display:block;        /* ทำให้จัด margin ได้ */
-  width:80%;            /* ใช้สัดส่วนที่คุณต้องการ */
-  height:auto;
-  max-width:100%;
-  margin:0 auto;        /* ✅ บังคับกึ่งกลางแนวนอน */
-}
+    .hero img{display:block;width:80%;height:auto;max-width:100%;margin:0 auto;}
 
-
-    .bc-group{display:flex;width:100%}
+    .bc-group{position:relative;display:flex;width:100%}
     .bc-prefix,.bc-tail{font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1;min-width:0}
     .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;background:#f3f4f6;color:#6b7280;border-radius:10px 0 0 10px;pointer-events:none;user-select:none}
-    .bc-tail{text-align:center;border-radius:0 10px 10px 0}
+    .bc-tail{ text-align:center; border-radius:0 10px 10px 0; padding-right:48px; }
     .bc-tail:focus{box-shadow:0 0 0 2px rgba(145,198,94,.25)}
+
+    .scan-btn{
+      position:absolute; right:6px; top:50%; transform:translateY(-50%);
+      width:36px;height:36px;border-radius:10px;border:0;cursor:pointer;background:var(--brand); color:#fff; display:grid; place-items:center
+    }
+    .scan-btn:active{transform:translateY(-50%) scale(.98)}
+    .scan-btn svg{width:22px;height:22px;display:block}
 
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
     .btn{font-size:16px;padding:.58em 1.2em;border-radius:50px;border:0;cursor:pointer;flex:1;max-width:100%}
@@ -52,19 +50,47 @@
     .msg.ok{color:#166534}.msg.err{color:#b00020}
 
     footer{text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
+
+    /* Overlay Scan */
+    #lscan-overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999;}
+    #lscan-overlay.show{display:flex}
+    #lscan-box{width:min(92vw,680px); background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.35); display:flex; flex-direction:column;}
+    .lscan-toolbar{display:grid; grid-template-columns:36px 1fr 36px; align-items:center; padding:8px 10px; background:#fff; border-bottom:1px solid #eef2f7;}
+    .lscan-title{text-align:center;font-weight:600;font-size:18px;color:#222}
+    .lscan-x{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;border:0;background:#fff;color:#000;cursor:pointer;font-size:18px;font-weight:800}
+    .lscan-viewport{position:relative;background:#000;width:100%;height:360px;max-height:360px}
+    @media (max-width:480px){ .lscan-viewport{height:320px;max-height:320px} }
+    #lscan-video{width:100%;height:100%;object-fit:cover;display:block}
+    .lscan-guide{pointer-events:none;position:absolute;inset:0;z-index:5;display:grid;place-items:center}
+    @keyframes redPulse{0%{box-shadow:0 0 12px #f00}50%{box-shadow:0 0 24px #f00}100%{box-shadow:0 0 12px #f00}}
+    .lscan-mid{position:absolute;left:6%;right:6%;top:50%;transform:translateY(-50%);height:2px;background:#f00;animation:redPulse 1.6s ease-in-out infinite}
+    .lscan-rect{position:relative;width:86%;height:34%}
+    .lscan-corner{position:absolute;width:28px;height:28px}
+    .lscan-corner::before,.lscan-corner::after{content:"";position:absolute;background:#fff}
+    .lscan-corner::before{height:2px;width:100%}
+    .lscan-corner::after{width:2px;height:100%}
+    .lscan-corner.tl{top:0;left:0}.lscan-corner.tr{top:0;right:0;transform:scaleX(-1)}
+    .lscan-corner.bl{bottom:0;left:0;transform:scaleY(-1)}.lscan-corner.br{bottom:0;right:0;transform:scale(-1,-1)}
+
+    .lscan-controls{padding:12px;background:#fff;border-top:1px solid #eef2f7}
+    .lscan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .ec-card{display:flex;align-items:center;gap:10px;justify-content:center;border:1px solid #e5e7eb;border-radius:14px;padding:8px 8px;background:#fff;cursor:pointer;transition:transform .06s ease, box-shadow .06s ease;}
+    .ec-card:active{transform:scale(.98)}
+    .ec-ico{display:inline-grid;place-items:center;width:32px;height:32px}
+    .ec-ico svg{width:100%;height:100%}
+
+    /* ซ่อน input แบบเข้าถึงได้ */
+    input[type=file].hidden{position:absolute !important;clip:rect(0 0 0 0) !important;width:1px;height:1px;overflow:hidden;border:0;padding:0;margin:-1px}
   </style>
 </head>
 <body>
   <main>
     <div class="wrap">
-
-      <!-- การ์ดฟอร์ม -->
       <section class="card" aria-label="ฟอร์มบาร์โค้ด">
-            <p class="header">REGISTRATION</p>
-      <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
+        <p class="header">REGISTRATION</p>
+        <p class="subtext">ลงทะเบียนรับประกันสินค้า Eazy Care</p>
 
         <section class="hero">
-          <!-- ❌ ลบ width/height ตายตัวออก และปล่อยให้ CSS คุมขนาด -->
           <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
                alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" loading="lazy">
           <p class="lead" style="margin:8px 0;color:#666;font-weight:400">
@@ -75,6 +101,12 @@
         <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
           <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true">
           <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
+          <button id="bc-scan" class="scan-btn" type="button" title="สแกนบาร์โค้ด" aria-haspopup="dialog">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.71 452.51" aria-hidden="true">
+              <g><path d="M8.91,138.75c-4.92,0-8.91-3.99-8.91-8.91V48C0,21.53,21.48,0,47.88,0h81.59c4.92,0,8.91,3.99,8.91,8.91s-3.99,8.91-8.91,8.91H47.88c-16.57,0-30.05,13.53-30.05,30.17v81.84c0,4.92-3.99,8.91-8.91,8.91Z" fill="#fff"/><path d="M129.46,452.52H47.88c-26.4,0-47.88-21.53-47.88-48v-81.85c0-4.92,3.99-8.91,8.91-8.91s8.91,3.99,8.91,8.91v81.85c0,16.64,13.48,30.17,30.05,30.17h81.59c4.92,0,8.91,3.99,8.91,8.91s-3.99,8.91-8.91,8.91Z" fill="#fff"/><path d="M442.26,138.75c-4.92,0-8.91-3.99-8.91-8.91V48c0-16.64-13.48-30.17-30.05-30.17h-81.59c-4.92,0-8.91-3.99-8.91-8.91s3.99-8.91,8.91-8.91h81.59c26.4,0,47.88,21.53,47.88,48v81.84c0,4.92-3.99,8.91-8.91,8.91Z" fill="#fff"/><path d="M403.3,452.52h-81.59c-4.92,0-8.91-3.99-8.91-8.91s3.99-8.91,8.91-8.91h81.59c16.57,0,30.05-13.53,30.05-30.17v-81.85c0-4.92,3.99-8.91,8.91-8.91s8.91,3.99,8.91,8.91v-81.85c0,26.47-21.48,48-47.88,48Z" fill="#fff"/></g>
+              <g><path d="M440.18,227.94c0,3.34-2.7,6.05-7.63,6.05H17.87c-4.92,0-6.87-2.71-6.87-6.05s1.95-6.05,6.87-6.05h414.69c4.93,0,7.63,2.71,7.63,6.05Z" fill="#fff"/></g>
+            </svg>
+          </button>
         </div>
 
         <div class="actions"><button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button></div>
@@ -87,46 +119,72 @@
 
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
+  <!-- Popup สแกน -->
+  <div id="lscan-overlay" aria-hidden="true">
+    <div id="lscan-box" role="dialog" aria-modal="true" aria-labelledby="lscan-title">
+      <div class="lscan-toolbar">
+        <div></div><div class="lscan-title" id="lscan-title">สแกนบาร์โค้ด</div>
+        <button id="lscan-close" class="lscan-x" title="ปิด" type="button">✕</button>
+      </div>
+
+      <div class="lscan-viewport" id="lscan-viewport">
+        <video id="lscan-video" muted autoplay playsinline></video>
+
+        <div class="lscan-guide" aria-hidden="true">
+          <div class="lscan-mid"></div>
+          <div class="lscan-rect" role="presentation">
+            <span class="lscan-corner tl"></span>
+            <span class="lscan-corner tr"></span>
+            <span class="lscan-corner bl"></span>
+            <span class="lscan-corner br"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lscan-controls">
+        <div class="lscan-grid">
+          <!-- ใช้ label + for -->
+          <label for="lscan-filecam" class="ec-card" role="button" aria-label="ถ่ายภาพ">
+            <span class="ec-ico" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.71 452.51">
+                <path d="M746,345.06H662l-17-48.4c-4.82-13.71-18.81-22.92-34.84-22.92H451.79c-16,0-30,9.21-34.83,22.92l-17,48.4H254a54.94,54.94,0,0,0-54.88,54.88V671.38A54.94,54.94,0,0,0,254,726.26H746a54.93,54.93,0,0,0,54.87-54.88V399.94A54.93,54.93,0,0,0,746,345.06ZM295.82,466.51a31.45,31.45,0,1,1,31.46-31.45A31.45,31.45,0,0,1,295.82,466.51Zm328,162a131.44,131.44,0,0,1-185.67,0C387,577.3,387,494,438.16,442.83s134.48-51.19,185.67,0A131.41,131.41,0,0,1,623.83,628.49Z" transform="translate(-199.15 -273.74)" fill="#91c65e"/>
+                <circle cx="331.86" cy="261.91" r="103.64" fill="#91c65e"/>
+              </svg>
+            </span>
+            <span class="ec-sub">ถ่ายภาพ</span>
+          </label>
+
+          <label for="lscan-file" class="ec-card" role="button" aria-label="แนบรูปภาพ">
+            <span class="ec-ico" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655.8 451.39">
+                <path d="M620-1H34.2C15.3-1,0,14.3,0,33.1v415c0,18.8,15.3,34.2,34.2,34.2h585.9c18.8,0,34.2-15.3,34.2-34.2V33.1c0-18.8-15.3-34.2-34.2-34.2ZM137.9,76.5c30.7,0,55.6,24.9,55.6,55.6s-24.9,55.6-55.6,55.6-55.6-24.9-55.6-55.6,24.9-55.6,55.6-55.6ZM602.1,430.2H52.1v-54.3l186.1-143.1c7.4-5.7,17.8-5,24.4,1.6l51.9,51.9c7.2,7.2,19,7.2,26.2,0l111.6-111.6c7.2-7.2,19-7.2,26.2,0ล123.5,123.5v132Z" fill="#91c65e"/>
+              </svg>
+            </span>
+            <span class="ec-sub">แนบรูปภาพ</span>
+          </label>
+        </div>
+
+        <input id="lscan-filecam" class="hidden" type="file" accept="image/*;capture=camera" capture="environment" />
+        <input id="lscan-file"    class="hidden" type="file" accept="image/*" />
+      </div>
+    </div>
+  </div>
+
   <script>
   (async function(){
     'use strict';
-    /* ==================== CONFIG ==================== */
-    const LIFF_ID       = '2008100293-1xx32BzA';                 // 🔧 แก้เป็นของจริงถ้าจำเป็น
-    const WP_ORIGIN     = 'https://www.eazycare.in.th';           // โดเมน WordPress (ใช้สำหรับ SSO bridge)
-    const REGISTER_URL  = WP_ORIGIN + '/การรับประกัน/';          // หน้าแบบฟอร์ม Elementor
+    const LIFF_ID       = '2008100293-1xx32BzA';
+    const WP_ORIGIN     = 'https://www.eazycare.in.th';
+    const REGISTER_URL  = WP_ORIGIN + '/การรับประกัน/';
     const API_URL       = WP_ORIGIN + '/wp-json/eazycare/v1/product-lookup?code=';
 
-    /* ==================== Helpers ==================== */
     const $ = (s,r=document)=>r.querySelector(s);
     const elPrefix=$('#bc-prefix'), elTail3=$('#bc-tail'), elMsg=$('#bc-msg');
-    const btnOk=$('#btn-ok'), btnSkip=$('#btn-skip');
+    const btnOk=$('#btn-ok'), btnSkip=$('#btn-skip'), btnScan=$('#bc-scan');
     const BARCODE_PREFIX=elPrefix.value||'8851003738';
     const onlyDigits=v=>(v||'').replace(/\D+/g,'');
     const setMsg=(t,ok)=>{elMsg.className='msg '+(ok?'ok':'err');elMsg.textContent=t||'';};
 
-    function b64urlEncodeJson(obj){
-      try{
-        const json=JSON.stringify(obj);
-        const b64=btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p)));
-        return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-      }catch(_){return ''}
-    }
-
-    function buildSsoUrl(idToken, redirUrl){
-      const sso = new URL('/wp-admin/admin-post.php', WP_ORIGIN);
-      sso.searchParams.set('action','ec_liff_sso');
-      sso.searchParams.set('redir', redirUrl);
-      if (idToken) sso.searchParams.set('id_token', idToken);
-      return sso.toString();
-    }
-
-    async function lookup(code13){
-      const res=await fetch(API_URL+encodeURIComponent(code13),{method:'GET',mode:'cors',credentials:'omit'});
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.json();
-    }
-
-    /* ==================== LIFF Init (get email/id_token) ==================== */
     let ecUser=null, idToken=null;
     try{
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
@@ -136,7 +194,26 @@
       ecUser = { email: dec?.email || '' };
     }catch(e){ console.warn('LIFF unavailable', e); }
 
-    /* ==================== Input behaviors ==================== */
+    function b64urlEncodeJson(obj){
+      try{
+        const json=JSON.stringify(obj);
+        const b64=btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p)));
+        return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      }catch(_){return '';}
+    }
+    function buildSsoUrl(idToken, redirUrl){
+      const sso = new URL('/wp-admin/admin-post.php', WP_ORIGIN);
+      sso.searchParams.set('action','ec_liff_sso');
+      sso.searchParams.set('redir', redirUrl);
+      if (idToken) sso.searchParams.set('id_token', idToken);
+      return sso.toString();
+    }
+    async function lookup(code13){
+      const res=await fetch(API_URL+encodeURIComponent(code13),{method:'GET',mode:'cors',credentials:'omit'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }
+
     function onInput(){
       let d=onlyDigits(elTail3.value);
       if(d.length>3) d=d.slice(-3);
@@ -148,7 +225,6 @@
     elTail3.addEventListener('keyup',e=>{if(e.key==='Enter'&&!btnOk.disabled)btnOk.click();});
     onInput();
 
-    /* ==================== Main actions ==================== */
     btnOk.addEventListener('click',async()=>{
       const tail3=onlyDigits(elTail3.value);
       if(tail3.length!==3){setMsg('ต้องกรอกให้ครบ 3 หลัก',false);return;}
@@ -166,44 +242,170 @@
         const data=await lookup(full13);
         if(data && data.ok && !data.not_found && data.product_name){
           setTimeout(()=>{setMsg('พบสินค้าแล้ว: '+data.product_name,true);},3600);
-          const payload={
-            product:{
-              product_name:data.product_name,
-              category_base:data.category_base||'',
-              system:data.system||'',
-              category:data.category||''
-            },
-            ...(ecUser?{user:ecUser}:{})
-          };
+          const payload={ product:{ product_name:data.product_name, category_base:data.category_base||'', system:data.system||'', category:data.category||'' }, ...(ecUser?{user:ecUser}:{}) };
           const ecp=b64urlEncodeJson(payload);
           const registerUrl=new URL(REGISTER_URL); registerUrl.searchParams.set('ecp',ecp);
 
-          // ✅ ไป SSO bridge ก่อนเสมอ ถ้ามี id_token เพื่อให้ WP ตั้งคุกกี้ แล้วค่อยเด้งเข้าแบบฟอร์ม
-          if(idToken){
-            const ssoUrl = buildSsoUrl(idToken, registerUrl.toString());
-            setTimeout(()=>{ location.href = ssoUrl; }, 4200);
-          }else{
-            // ถ้าไม่มี id_token (เช่น เปิดนอก LINE) ก็เข้าฟอร์มตรง ๆ และให้กันตกที่ปลายทางดูแล
-            setTimeout(()=>{ location.href = registerUrl.toString(); }, 4200);
-          }
+          if(idToken){ const ssoUrl = buildSsoUrl(idToken, registerUrl.toString()); setTimeout(()=>{ location.href = ssoUrl; }, 4200); }
+          else{ setTimeout(()=>{ location.href = registerUrl.toString(); }, 4200); }
         }else{
-          setTimeout(()=>{setMsg('ไม่พบสินค้า กรุณาตรวจสอบเลขอีกครั้ง หรือกด "ข้าม"',false);btnOk.disabled=false;},3200);
+          setTimeout(()=>{setMsg('ไม่พบสินค้า โปรดลองสแกนใหม่ หรือกด “ข้าม”',false);btnOk.disabled=false;},3200);
         }
       }catch(e){
         console.error(e);
-        setTimeout(()=>{setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือลองกด “ข้าม”',false);btnOk.disabled=false;},3000);
+        setTimeout(()=>{setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่ หรือกด “ข้าม”',false);btnOk.disabled=false;},3000);
       }
     });
 
     btnSkip.addEventListener('click',()=>{
       const registerUrl=new URL(REGISTER_URL);
       if(ecUser){ const ecp=b64urlEncodeJson({user:ecUser}); registerUrl.searchParams.set('ecp',ecp); }
-      if(idToken){
-        const ssoUrl = buildSsoUrl(idToken, registerUrl.toString());
-        location.href = ssoUrl;
-      }else{
-        location.href = registerUrl.toString();
+      if(idToken){ const ssoUrl = buildSsoUrl(idToken, registerUrl.toString()); location.href = ssoUrl; }
+      else{ location.href = registerUrl.toString(); }
+    });
+
+    // ===== Scan overlay =====
+    const ovl = $('#lscan-overlay');
+    const btnClose = $('#lscan-close');
+    const fileCam   = $('#lscan-filecam');
+    const file      = $('#lscan-file');
+
+    btnScan.addEventListener('click', ()=>{ ovl.classList.add('show'); ovl.setAttribute('aria-hidden','false'); startScanner().catch(e=>setMsg('ไม่สามารถเริ่มสแกนได้: '+e,false)); });
+    btnClose.addEventListener('click', hideOverlay);
+    ovl.addEventListener('click', (e)=>{ if (e.target === ovl) hideOverlay(); });
+    document.addEventListener('keydown', (e)=>{ if((e.key==='Escape'||e.key==='Esc') && ovl.classList.contains('show')) hideOverlay(); });
+
+    function hideOverlay(){
+      ovl.classList.remove('show');
+      ovl.setAttribute('aria-hidden','true');
+      setTimeout(()=>stopScanner().catch(()=>{}),0);
+    }
+
+    function autoConfirm(){
+      const attempt=()=>{
+        if(elTail3.value.trim().length===3){
+          btnOk.disabled=false;
+          btnOk.click();
+        }
+      };
+      setTimeout(attempt,0);
+      setTimeout(attempt,120);
+      setTimeout(attempt,400);
+    }
+
+    const decoders = ["ean_reader","ean_8_reader","upc_reader","upc_e_reader","code_128_reader"];
+    let lastCode=null,lastTime=0;
+
+    function onDetected(result){
+      const now=Date.now();
+      const code=result?.codeResult?.code||'';
+      if(!code) return;
+      if(code===lastCode && (now-lastTime)<1000) return;
+      lastCode=code; lastTime=now;
+
+      const tail3=(''+code).replace(/\D+/g,'').slice(-3);
+      if(tail3.length===3){
+        elTail3.value=tail3; onInput();
+        hideOverlay();
+        autoConfirm();
+      }else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
+    }
+
+    function quaggaDecodeOnce(opts){ return new Promise(res=>Quagga.decodeSingle(opts,out=>res(out||null))); }
+    async function makeTransformedBlob(blob, maxW=1280, rotateDeg=0){
+      const bmp=await createImageBitmap(blob);
+      const swap=rotateDeg%180!==0;
+      const baseW=swap?bmp.height:bmp.width, baseH=swap?bmp.width:bmp.height;
+      const ratio=Math.min(1,maxW/baseW);
+      const w=Math.max(1,Math.round(baseW*ratio)), h=Math.max(1,Math.round(baseH*ratio));
+      const cvs=document.createElement('canvas'); cvs.width=w; cvs.height=h;
+      const ctx=cvs.getContext('2d',{alpha:false,desynchronized:true});
+      if('filter' in ctx) ctx.filter='contrast(115%) brightness(105%)';
+      ctx.save();
+      if(rotateDeg===0){ ctx.drawImage(bmp,0,0,w,h); }
+      else if(rotateDeg===90){ ctx.translate(w,0); ctx.rotate(Math.PI/2); ctx.drawImage(bmp,0,0,h,w); }
+      else if(rotateDeg===180){ ctx.translate(w,h); ctx.rotate(Math.PI); ctx.drawImage(bmp,0,0,w,h); }
+      else if(rotateDeg===270){ ctx.translate(0,h); ctx.rotate(3*Math.PI/2); ctx.drawImage(bmp,0,0,h,w); }
+      ctx.restore(); bmp.close();
+      return new Promise(res=>cvs.toBlob(b=>res(b),'image/jpeg',0.9));
+    }
+    async function decodeBlobSmart(blob, readers){
+      const angles=[0,90,180,270];
+      for(const ang of angles){
+        const quick=await makeTransformedBlob(blob,1280,ang);
+        const url=URL.createObjectURL(quick);
+        const r=await quaggaDecodeOnce({src:url,numOfWorkers:0,inputStream:{size:1280},locator:{patchSize:'medium',halfSample:true},decoder:{readers},locate:true});
+        URL.revokeObjectURL(url);
+        if(r?.codeResult?.code) return r;
       }
+      for(const ang of angles){
+        const hi=await makeTransformedBlob(blob,1600,ang);
+        const url=URL.createObjectURL(hi);
+        const r=await quaggaDecodeOnce({src:url,numOfWorkers:0,inputStream:{size:1600},locator:{patchSize:'large',halfSample:false},decoder:{readers},locate:true});
+        URL.revokeObjectURL(url);
+        if(r?.codeResult?.code) return r;
+      }
+      return null;
+    }
+
+    async function startScanner(){
+      const cfg={
+        inputStream:{ type:"LiveStream", target: document.querySelector('#lscan-viewport')||document.body,
+          constraints:{facingMode:"environment",width:{ideal:1280},height:{ideal:720},aspectRatio:{ideal:16/9}},
+          area:{top:"20%",right:"7%",left:"7%",bottom:"20%"} },
+        numOfWorkers: navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2,
+        frequency:10,
+        locator:{patchSize:"medium",halfSample:true},
+        decoder:{ readers: decoders.map(n=>({format:n,config:{}})) },
+        locate:true
+      };
+      return new Promise((resolve,reject)=>{
+        Quagga.init(cfg, err=>{
+          if(err){ reject(err); return; }
+          Quagga.onDetected(onDetected);
+          Quagga.start();
+          resolve();
+        });
+      });
+    }
+    async function stopScanner(){
+      try{ Quagga.offDetected(onDetected); }catch(_){}
+      try{ Quagga.stop(); }catch(_){}
+      try{
+        const s=Quagga.CameraAccess.getActiveStream();
+        if(s) s.getTracks().forEach(t=>t.stop());
+      }catch(_){}
+    }
+
+    // เลือกรูป/ถ่ายภาพ (ผ่าน label)
+    file.addEventListener('change', async ()=>{
+      const f=file.files?.[0]; if(!f) return;
+      hideOverlay();
+      const readers=decoders.map(n=>({format:n,config:{}}));
+      try{
+        const result=await decodeBlobSmart(f, readers);
+        const code=result?.codeResult?.code||'';
+        const tail3=(''+code).replace(/\D+/g,'').slice(-3);
+        if(tail3.length===3){ elTail3.value=tail3; onInput(); autoConfirm(); }
+        else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
+      }catch(e){
+        setMsg('สแกนจากรูปไม่สำเร็จ โปรดลองใหม่ หรือกรอกเลข 3 หลักท้ายเอง', false);
+      }finally{ file.value=''; }
+    });
+
+    fileCam.addEventListener('change', async ()=>{
+      const f=fileCam.files?.[0]; if(!f) return;
+      hideOverlay();
+      const readers=decoders.map(n=>({format:n,config:{}}));
+      try{
+        const result=await decodeBlobSmart(f, readers);
+        const code=result?.codeResult?.code||'';
+        const tail3=(''+code).replace(/\D+/g,'').slice(-3);
+        if(tail3.length===3){ elTail3.value=tail3; onInput(); autoConfirm(); }
+        else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
+      }catch(e){
+        setMsg('สแกนจากรูปไม่สำเร็จ โปรดลองใหม่ หรือกรอกเลข 3 หลักท้ายเอง', false);
+      }finally{ fileCam.value=''; }
     });
   })();
   </script>
