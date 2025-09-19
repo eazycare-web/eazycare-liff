@@ -74,13 +74,22 @@
 
     .lscan-controls{padding:12px;background:#fff;border-top:1px solid #eef2f7}
     .lscan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .ec-card{display:flex;align-items:center;gap:10px;justify-content:center;border:1px solid #e5e7eb;border-radius:14px;padding:8px 8px;background:#fff;cursor:pointer;transition:transform .06s ease, box-shadow .06s ease;}
+    .ec-card{
+      position:relative;
+      display:flex;align-items:center;gap:10px;justify-content:center;
+      border:1px solid #e5e7eb;border-radius:14px;padding:8px 8px;background:#fff;
+      cursor:pointer;transition:transform .06s ease, box-shadow .06s ease;
+    }
     .ec-card:active{transform:scale(.98)}
     .ec-ico{display:inline-grid;place-items:center;width:32px;height:32px}
     .ec-ico svg{width:100%;height:100%}
 
-    /* ซ่อน input แบบเข้าถึงได้ */
-    input[type=file].hidden{position:absolute !important;clip:rect(0 0 0 0) !important;width:1px;height:1px;overflow:hidden;border:0;padding:0;margin:-1px}
+    /* input file แบบ overlay โปร่งใส คลิกได้จริง (เวิร์คทุกแพลตฟอร์ม) */
+    .file-overlay{
+      position:absolute; inset:0;
+      opacity:0; cursor:pointer; border:0; padding:0; margin:0;
+      width:100%; height:100%;
+    }
   </style>
 </head>
 <body>
@@ -143,8 +152,8 @@
 
       <div class="lscan-controls">
         <div class="lscan-grid">
-          <!-- ใช้ label + for -->
-          <label for="lscan-filecam" class="ec-card" role="button" aria-label="ถ่ายภาพ">
+          <!-- การ์ด + input file ซ้อนทับ (opacity:0) -->
+          <div class="ec-card" role="button" aria-label="ถ่ายภาพ">
             <span class="ec-ico" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.71 452.51">
                 <path d="M746,345.06H662l-17-48.4c-4.82-13.71-18.81-22.92-34.84-22.92H451.79c-16,0-30,9.21-34.83,22.92l-17,48.4H254a54.94,54.94,0,0,0-54.88,54.88V671.38A54.94,54.94,0,0,0,254,726.26H746a54.93,54.93,0,0,0,54.87-54.88V399.94A54.93,54.93,0,0,0,746,345.06ZM295.82,466.51a31.45,31.45,0,1,1,31.46-31.45A31.45,31.45,0,0,1,295.82,466.51Zm328,162a131.44,131.44,0,0,1-185.67,0C387,577.3,387,494,438.16,442.83s134.48-51.19,185.67,0A131.41,131.41,0,0,1,623.83,628.49Z" transform="translate(-199.15 -273.74)" fill="#91c65e"/>
@@ -152,20 +161,19 @@
               </svg>
             </span>
             <span class="ec-sub">ถ่ายภาพ</span>
-          </label>
+            <input id="lscan-filecam" class="file-overlay" type="file" accept="image/*" capture="environment" />
+          </div>
 
-          <label for="lscan-file" class="ec-card" role="button" aria-label="แนบรูปภาพ">
+          <div class="ec-card" role="button" aria-label="แนบรูปภาพ">
             <span class="ec-ico" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655.8 451.39">
-                <path d="M620-1H34.2C15.3-1,0,14.3,0,33.1v415c0,18.8,15.3,34.2,34.2,34.2h585.9c18.8,0,34.2-15.3,34.2-34.2V33.1c0-18.8-15.3-34.2-34.2-34.2ZM137.9,76.5c30.7,0,55.6,24.9,55.6,55.6s-24.9,55.6-55.6,55.6-55.6-24.9-55.6-55.6,24.9-55.6,55.6-55.6ZM602.1,430.2H52.1v-54.3l186.1-143.1c7.4-5.7,17.8-5,24.4,1.6l51.9,51.9c7.2,7.2,19,7.2,26.2,0l111.6-111.6c7.2-7.2,19-7.2,26.2,0ล123.5,123.5v132Z" fill="#91c65e"/>
+                <path d="M620-1H34.2C15.3-1,0,14.3,0,33.1v415c0,18.8,15.3,34.2,34.2,34.2h585.9c18.8,0,34.2-15.3,34.2-34.2V33.1c0-18.8-15.3-34.2-34.2-34.2ZM137.9,76.5c30.7,0,55.6,24.9,55.6,55.6s-24.9,55.6-55.6,55.6-55.6-24.9-55.6-55.6,24.9-55.6,55.6-55.6ZM602.1,430.2H52.1v-54.3l186.1-143.1c7.4-5.7,17.8-5,24.4,1.6l51.9,51.9c7.2,7.2,19,7.2,26.2,0l111.6-111.6c7.2-7.2,19-7.2,26.2,0l123.5,123.5v132Z" fill="#91c65e"/>
               </svg>
             </span>
             <span class="ec-sub">แนบรูปภาพ</span>
-          </label>
+            <input id="lscan-file" class="file-overlay" type="file" accept="image/*" />
+          </div>
         </div>
-
-        <input id="lscan-filecam" class="hidden" type="file" accept="image/*;capture=camera" capture="environment" />
-        <input id="lscan-file"    class="hidden" type="file" accept="image/*" />
       </div>
     </div>
   </div>
@@ -270,7 +278,16 @@
     const fileCam   = $('#lscan-filecam');
     const file      = $('#lscan-file');
 
-    btnScan.addEventListener('click', ()=>{ ovl.classList.add('show'); ovl.setAttribute('aria-hidden','false'); startScanner().catch(e=>setMsg('ไม่สามารถเริ่มสแกนได้: '+e,false)); });
+    btnScan.addEventListener('click', ()=>{ 
+      ovl.classList.add('show'); 
+      ovl.setAttribute('aria-hidden','false'); 
+      // เริ่มสแกนสด ถ้า Quagga ใช้งานได้ (ต้อง HTTPS และอนุญาตกล้อง)
+      if (typeof Quagga !== 'undefined') {
+        startScanner().catch(e=>setMsg('ไม่สามารถเริ่มสแกนได้: '+e,false));
+      } else {
+        setMsg('ตัวสแกนสดไม่พร้อม ใช้ “ถ่ายภาพ/แนบรูปภาพ” แทนได้', false);
+      }
+    });
     btnClose.addEventListener('click', hideOverlay);
     ovl.addEventListener('click', (e)=>{ if (e.target === ovl) hideOverlay(); });
     document.addEventListener('keydown', (e)=>{ if((e.key==='Escape'||e.key==='Esc') && ovl.classList.contains('show')) hideOverlay(); });
@@ -341,7 +358,7 @@
       for(const ang of angles){
         const hi=await makeTransformedBlob(blob,1600,ang);
         const url=URL.createObjectURL(hi);
-        const r=await quaggaDecodeOnce({src:url,numOfWorkers:0,inputStream:{size:1600},locator:{patchSize:'large',halfSample:false},decoder:{readers},locate:true});
+        const r=await quaggaDecodeOnce({src=url,numOfWorkers:0,inputStream:{size:1600},locator:{patchSize:'large',halfSample:false},decoder:{readers},locate:true});
         URL.revokeObjectURL(url);
         if(r?.codeResult?.code) return r;
       }
@@ -377,7 +394,10 @@
       }catch(_){}
     }
 
-    // เลือกรูป/ถ่ายภาพ (ผ่าน label)
+    // ===== เลือกรูป/ถ่ายภาพ =====
+    const file   = document.getElementById('lscan-file');
+    const fileCam= document.getElementById('lscan-filecam');
+
     file.addEventListener('change', async ()=>{
       const f=file.files?.[0]; if(!f) return;
       hideOverlay();
