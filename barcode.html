@@ -28,7 +28,7 @@
     .hero img{display:block;width:80%;max-width:100%;margin:0 auto;}
 
     /* ===== ฟิลด์บาร์โค้ด (เหมือนหน้าเว็บ) ===== */
-    .bc-group{position:relative;display:flex;width:100%}
+    .bc-group{position:relative;display:flex;width:100%;height: 40px;}
     .bc-prefix,.bc-tail{
       font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;box-sizing:border-box;
     }
@@ -44,8 +44,20 @@
 
     /* ปุ่มสแกนในช่อง (เหมือนหน้าเว็บ) */
     .scan-btn{
-      position:absolute; right:6px; top:50%; transform:translateY(-50%);
-      width:36px;height:36px;border-radius:10px;border:0;cursor:pointer;background:var(--brand); color:#fff; display:grid; place-items:center
+      position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 0px 10px 10px 0;
+    border: 0;
+    cursor: pointer;
+    background: var(--brand);
+    color: #fff;
+    display: grid
+;
+    place-items: center;
     }
     .scan-btn:active{transform:translateY(-50%) scale(.98)}
     .scan-btn svg{width:24px;height:24px;display:block}
@@ -114,9 +126,7 @@
         <section class="hero">
           <img src="https://www.eazycare.in.th/wp-content/uploads/2025/09/Barcodeexam.jpg"
                alt="ตัวอย่างวิธีดูเลขท้ายบาร์โค้ด" loading="lazy">
-          <p class="lead" style="margin:8px 0;color:#666;font-weight:400">
-            กรอกเลข <strong>3 หลักสุดท้าย</strong> ของบาร์โค้ด
-          </p>
+         
         </section>
 
         <!-- ===== ฟิลด์เหมือนหน้าเว็บ ===== -->
@@ -124,11 +134,22 @@
           <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก">
           <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
           <button id="bc-scan" class="scan-btn" type="button" title="สแกนบาร์โค้ด" aria-haspopup="dialog">
-            <!-- กล้อง -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4h10l2 3h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3Zm5 13a4 4 0 1 0 0-8a4 4 0 0 0 0 8Z"/></svg>
-          </button>
-        </div>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     width="36" height="36" 
+     viewBox="0 0 451.23 452.52" 
+     aria-hidden="true" role="img">
+  <path d="M49.11,49.12h115.15V0H42.81C19.2,0,0,19.2,0,42.81v110.02h48.97l.14-103.71Z" fill="currentcolor"/>
+  <path d="M402.24,152.83h48.98V42.81c0-23.61-19.2-42.81-42.81-42.81h-121.45v48.98h115.28v103.85Z" fill="currentcolor"/>
+  <path d="M49.12,299.69H0v110.02c0,23.6,19.2,42.81,42.81,42.81h121.45v-48.98H49.12v-103.85Z" fill="currentcolor"/>
+  <path d="M402.26,299.69l-.14,103.85h-115.15v48.98h121.45c23.61,0,42.81-19.2,42.81-42.81v-110.02h-48.97Z" fill="currentcolor"/>
+  <rect y="202.29" width="451.23" height="47.94" fill="currentcolor"/>
+</svg>
 
+         </button>
+        </div>
+ <p class="lead" style="margin:8px 0;color:#666;font-weight:400;text-align: center;">
+           สแกนบาร์โค้ดหรือกรอกเลข <strong>3 หลักสุดท้าย</strong> 
+          </p>
         <div class="actions"><button id="btn-ok" class="btn btn-primary" type="button" disabled>ยืนยัน</button></div>
         <div class="actions"><button id="btn-skip" class="btn btn-ghost" type="button">ข้าม (ไม่ทราบบาร์โค้ด)</button></div>
 
