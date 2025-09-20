@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
   <title>EazyCare | ลงทะเบียนรับประกัน</title>
 
-  <!-- ฟอนต์ Prompt -->
+  <!-- Prompt font -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -20,38 +20,49 @@
     .wrap {width:100%;max-width:720px;}
 
     .hero{text-align:center;margin-bottom:20px}
-    .header{font-size:2.2rem;font-weight:600;color:#91C65E;line-height:1.0;margin:30px 0 0;text-align:center;}
-    .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 30px;text-align:center;}
+    .header{font-size:2rem;font-weight:700;color:#91C65E;line-height:1.1;margin:22px 0 4px;text-align:center;}
+    .subtext{font-size:15px;font-weight:500;color:#666;margin:0 0 22px;text-align:center;}
 
     .card{background:var(--card);border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 6px 24px rgba(2,6,23,.06);overflow:hidden;}
     img{max-width:100%;height:auto;}
-    .hero img{display:block;width:80%;height:auto;max-width:100%;margin:0 auto;}
+    .hero img{display:block;width:80%;max-width:100%;margin:0 auto;}
 
+    /* ===== ฟิลด์บาร์โค้ด (เหมือนหน้าเว็บ) ===== */
     .bc-group{position:relative;display:flex;width:100%}
-    .bc-prefix,.bc-tail{font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;flex:1;min-width:0}
-    .bc-prefix{flex:0 0 55%;max-width:55%;text-align:center;background:#f3f4f6;color:#6b7280;border-radius:10px 0 0 10px;pointer-events:none;user-select:none}
-    .bc-tail{ text-align:center; border-radius:0 10px 10px 0; padding-right:48px; }
+    .bc-prefix,.bc-tail{
+      font-size:16px;line-height:1.2;padding:.78em 1em;border:0;background:#f9fafb;outline:none;letter-spacing:.14em;box-sizing:border-box;
+    }
+    .bc-prefix{
+      flex:0 0 55%;max-width:55%;min-width:140px;text-align:center;background:#f3f4f6;color:#0f172a;border-radius:10px 0 0 10px;
+      pointer-events:none;user-select:none
+    }
+    .bc-tail{
+      flex:1;min-width:0;text-align:center;border-radius:0 10px 10px 0;padding-right:48px;
+    }
     .bc-tail:focus{box-shadow:0 0 0 2px rgba(145,198,94,.25)}
+    .bc-tail::placeholder{color:#cfcfcf;opacity:1}
 
+    /* ปุ่มสแกนในช่อง (เหมือนหน้าเว็บ) */
     .scan-btn{
-position:absolute; right:6px; top:50%; transform:translateY(-50%);
+      position:absolute; right:6px; top:50%; transform:translateY(-50%);
       width:36px;height:36px;border-radius:10px;border:0;cursor:pointer;background:var(--brand); color:#fff; display:grid; place-items:center
     }
     .scan-btn:active{transform:translateY(-50%) scale(.98)}
-    .scan-btn svgy{width:36px; height:36px; display:block}
+    .scan-btn svg{width:24px;height:24px;display:block}
 
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
     .btn{font-size:16px;padding:.58em 1.2em;border-radius:50px;border:0;cursor:pointer;flex:1;max-width:100%}
     .btn-primary{background:var(--brand);color:#fff}
     .btn-primary:hover{background:var(--brand-dark)}
-    .btn-primary:disabled{opacity:.55;cursor:not-allowed}
-    .btn-ghost{background:#f8fafc;color:#666}
+    .btn-primary:disabled{filter:grayscale(10%);cursor:not-allowed}
+    .btn-ghost{background:#fff;color:#666;border:1px solid #e5e7eb}
+
     .msg{min-height:1.25em;margin-top:10px;text-align:center}
     .msg.ok{color:#166534}.msg.err{color:#b00020}
 
     footer{text-align:center;color:#fff;background-color:#91C65E;font-size:12px;padding:12px}
 
-    /* Overlay Scan */
+    /* ===== Overlay สแกน (เหมือนหน้าเว็บ) ===== */
     #lscan-overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999;}
     #lscan-overlay.show{display:flex}
     #lscan-box{width:min(92vw,680px); background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.35); display:flex; flex-direction:column;}
@@ -61,35 +72,36 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
     .lscan-viewport{position:relative;background:#000;width:100%;height:360px;max-height:360px}
     @media (max-width:480px){ .lscan-viewport{height:320px;max-height:320px} }
     #lscan-video{width:100%;height:100%;object-fit:cover;display:block}
+
     .lscan-guide{pointer-events:none;position:absolute;inset:0;z-index:5;display:grid;place-items:center}
-    @keyframes redPulse{0%{box-shadow:0 0 12px #f00}50%{box-shadow:0 0 24px #f00}100%{box-shadow:0 0 12px #f00}}
+    @keyframes redPulse{
+      0%{box-shadow:0 0 12px #ff0000,0 0 36px #ff0000}
+      50%{box-shadow:0 0 24px #ff0000,0 0 72px #ff0000}
+      100%{box-shadow:0 0 12px #ff0000,0 0 36px #ff0000}
+    }
     .lscan-mid{position:absolute;left:6%;right:6%;top:50%;transform:translateY(-50%);height:2px;background:#f00;animation:redPulse 1.6s ease-in-out infinite}
     .lscan-rect{position:relative;width:86%;height:34%}
     .lscan-corner{position:absolute;width:28px;height:28px}
     .lscan-corner::before,.lscan-corner::after{content:"";position:absolute;background:#fff}
     .lscan-corner::before{height:2px;width:100%}
     .lscan-corner::after{width:2px;height:100%}
-    .lscan-corner.tl{top:0;left:0}.lscan-corner.tr{top:0;right:0;transform:scaleX(-1)}
-    .lscan-corner.bl{bottom:0;left:0;transform:scaleY(-1)}.lscan-corner.br{bottom:0;right:0;transform:scale(-1,-1)}
+    .lscan-corner.tl{top:0;left:0}
+    .lscan-corner.tr{top:0;right:0;transform:scaleX(-1)}
+    .lscan-corner.bl{bottom:0;left:0;transform:scaleY(-1)}
+    .lscan-corner.br{bottom:0;right:0;transform:scale(-1,-1)}
 
     .lscan-controls{padding:12px;background:#fff;border-top:1px solid #eef2f7}
     .lscan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .ec-card{
-      position:relative;
-      display:flex;align-items:center;gap:10px;justify-content:center;
-      border:1px solid #e5e7eb;border-radius:14px;padding:8px 8px;background:#fff;
-      cursor:pointer;transition:transform .06s ease, box-shadow .06s ease;
+      position:relative; display:flex;align-items:center;gap:10px;justify-content:center;
+      border:1px solid #e5e7eb;border-radius:14px;padding:8px 8px;background:#fff; cursor:pointer;transition:transform .06s ease, box-shadow .06s ease;
     }
     .ec-card:active{transform:scale(.98)}
     .ec-ico{display:inline-grid;place-items:center;width:32px;height:32px}
     .ec-ico svg{width:100%;height:100%}
 
-    /* input file แบบ overlay โปร่งใส คลิกได้จริง (เวิร์คทุกแพลตฟอร์ม) */
-    .file-overlay{
-      position:absolute; inset:0;
-      opacity:0; cursor:pointer; border:0; padding:0; margin:0;
-      width:100%; height:100%;
-    }
+    /* input file แบบ overlay โปร่งใส คลิกได้จริง (ทุกแพลตฟอร์ม) */
+    .file-overlay{position:absolute; inset:0; opacity:0; cursor:pointer; border:0; padding:0; margin:0; width:100%; height:100%;}
   </style>
 </head>
 <body>
@@ -107,51 +119,18 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
           </p>
         </section>
 
+        <!-- ===== ฟิลด์เหมือนหน้าเว็บ ===== -->
         <div class="bc-group" role="group" aria-label="ใส่รหัสบาร์โค้ด">
-          <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true">
+          <input id="bc-prefix" class="bc-prefix" value="8851003738" readonly aria-readonly="true" aria-label="10 หลักแรก">
           <input id="bc-tail" class="bc-tail" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="เช่น 159" aria-label="3 หลักสุดท้าย">
           <button id="bc-scan" class="scan-btn" type="button" title="สแกนบาร์โค้ด" aria-haspopup="dialog">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.71 452.51" aria-hidden="true">
-  <path d="M8.91,138.75c4.92,0,8.91-3.99,8.91-8.91V48c0-16.64,13.48-30.17,30.05-30.17h81.59c4.92,0,8.91-3.99,8.91-8.91s-3.99-8.91-8.91-8.91H47.88C21.48,0,0,21.53,0,48v81.84c0,4.92,3.99,8.91,8.91,8.91Z" fill="#fff"/>
-  <path d="M129.46,434.69H47.88c-16.57,0-30.05-13.53-30.05-30.17v-81.85c0-4.92-3.99-8.91-8.91-8.91s-8.91,3.99-8.91,8.91v81.85c0,26.47,21.48,48,47.88,48h81.59c4.92,0,8.91-3.99,8.91-8.91s-3.99-8.91-8.91-8.91Z" fill="#fff"/>
-  <path d="M403.3,0h-81.59c-4.92,0-8.91,3.99-8.91,8.91s3.99,8.91,8.91,8.91h81.59c16.57,0,30.05,13.53,30.05,30.17v81.84c0,4.92,3.99,8.91,8.91,8.91s8.91-3.99,8.91-8.91V48c0-26.47-21.48-48-47.88-48Z" fill="#fff"/>
-  <path d="M442.26,313.76c-4.92,0-8.91,3.99-8.91,8.91v81.85c0,16.64-13.48,30.17-30.05,30.17h-81.59c-4.92,0-8.91,3.99-8.91,8.91s3.99,8.91,8.91,8.91h81.59c26.4,0,47.88-21.53,47.88-48v-81.85c0-4.92-3.99-8.91-8.91-8.91Z" fill="#fff"/>
-  <path d="M11,227.94c0,3.34,1.95,6.05,6.87,6.05h414.69c4.93,0,7.63-2.71,7.63-6.05s-2.7-6.05-7.63-6.05H17.87c-4.92,0-6.87,2.71-6.87,6.05Z" fill="#fff"/>
-  <path d="M69.01,138.75c-1.07,0-2.04.29-2.74.77-.7.47-1.14,1.13-1.14,1.85v68.16h7.74v-68.16c0-1.45-1.73-2.62-3.87-2.62Z" fill="#fff"/>
-  <path d="M103.8,138.75h-7.41c-2.14,0-3.87,1.17-3.87,2.62v68.16h15.15v-68.16c0-1.45-1.74-2.62-3.87-2.62Z" fill="#fff"/>
-  <path d="M126.2,138.75c-1.07,0-2.03.29-2.74.77-.69.47-1.13,1.13-1.13,1.85v68.16h7.74v-68.16c0-1.45-1.73-2.62-3.87-2.62Z" fill="#fff"/>
-  <path d="M134.73,141.38v68.16h7.74v-68.16c0-1.45-1.74-2.62-3.87-2.62-1.07,0-2.04.29-2.73.77-.71.47-1.14,1.13-1.14,1.85Z" fill="#fff"/>
-  <path d="M184.68,141.38c0-1.45-1.74-2.62-3.87-2.62h-7.41c-2.14,0-3.87,1.17-3.87,2.62v68.16h15.16v-68.16Z" fill="#fff"/>
-  <path d="M202.08,141.38c0-1.45-1.73-2.62-3.87-2.62-1.07,0-2.04.29-2.73.77-.71.47-1.14,1.13-1.14,1.85v68.16h7.74v-68.16Z" fill="#fff"/>
-  <path d="M236.87,141.38c0-1.45-1.73-2.62-3.87-2.62h-7.41c-2.14,0-3.87,1.17-3.87,2.62v68.16h15.16v-68.16Z" fill="#fff"/>
-  <path d="M264.26,141.38c0-1.45-1.74-2.62-3.87-2.62-1.07,0-2.04.29-2.73.77-.71.47-1.14,1.13-1.14,1.85v68.16h7.74v-68.16Z" fill="#fff"/>
-  <path d="M281.65,141.38c0-1.45-1.74-2.62-3.87-2.62-1.07,0-2.03.29-2.74.77-.69.47-1.13,1.13-1.13,1.85v68.16h7.74v-68.16Z" fill="#fff"/>
-  <path d="M304.04,141.38c0-1.45-1.73-2.62-3.87-2.62-1.07,0-2.04.29-2.73.77-.71.47-1.14,1.13-1.14,1.85v68.16h7.74v-68.16Z" fill="#fff"/>
-  <path d="M316.44,141.38c0-1.45-1.73-2.62-3.87-2.62-1.07,0-2.03.29-2.74.77-.69.47-1.13,1.13-1.13,1.85v68.16h7.74v-68.16Z" fill="#fff"/>
-  <path d="M347.37,138.75h-4.42c-2.14,0-3.87,1.17-3.87,2.62v68.16h12.16v-68.16c0-1.45-1.73-2.62-3.87-2.62Z" fill="#fff"/>
-  <path d="M364.77,138.75c-1.07,0-2.04.29-2.74.77-.7.47-1.14,1.13-1.14,1.85v68.16h7.74v-68.16c0-1.45-1.73-2.62-3.87-2.62Z" fill="#fff"/>
-  <path d="M382.17,138.75c-1.07,0-2.04.29-2.74.77-.7.47-1.14,1.13-1.14,1.85v68.16h7.74v-68.16c0-1.45-1.73-2.62-3.87-2.62Z" fill="#fff"/>
-  <path d="M69.01,317.12c2.14,0,3.87-1.18,3.87-2.62v-68.16h-7.74v68.16c0,1.45,1.74,2.62,3.87,2.62Z" fill="#fff"/>
-  <path d="M96.39,317.12h7.41c2.14,0,3.87-1.18,3.87-2.62v-68.16h-15.15v68.16c0,1.45,1.73,2.62,3.87,2.62Z" fill="#fff"/>
-  <path d="M126.2,317.12c2.14,0,3.87-1.18,3.87-2.62v-68.16h-7.74v68.16c0,1.45,1.73,2.62,3.87,2.62Z" fill="#fff"/>
-  <path d="M134.73,314.5c0,1.45,1.73,2.62,3.87,2.62s3.87-1.18,3.87-2.62v-68.16h-7.74v68.16Z" fill="#fff"/>
-  <path d="M169.53,314.5c0,1.45,1.73,2.62,3.87,2.62h7.41c2.14,0,3.87-1.18,3.87-2.62v-68.16h-15.16ว v68.16Z" fill="#fff"/>
-  <path d="M194.34,314.5c0,1.45,1.73,2.62,3.87,2.62s3.87-1.18,3.87-2.62v-68.16h-7.74v68.16Z" fill="#fff"/>
-  <path d="M221.72,314.5c0,1.45,1.74,2.62,3.87,2.62h7.41c2.14,0,3.87-1.18,3.87-2.62v-68.16h-15.16v68.16Z" fill="#fff"/>
-  <path d="M256.51,314.5c0,1.45,1.73,2.62,3.87,2.62s3.87-1.18,3.87-2.62v-68.16h-7.74v68.16Z" fill="#fff"/>
-  <path d="M273.91,314.5c0,1.45,1.73,2.62,3.87,2.62s3.87-1.18,3.87-2.62v-68.16h-7.74v68.16Z" fill="#fff"/>
-  <path d="M296.3,314.5c0,1.45,1.73,2.62,3.87,2.62s3.87-1.18,3.87-2.62v-68.16h-7.74v68.16Z" fill="#fff"/>
-  <path d="M316.44,314.5v-68.16h-7.74v68.16c0,1.45,1.73,2.62,3.87,2.62s3.87-1.18,3.87-2.62Z" fill="#fff"/>
-  <path d="M342.95,317.12h4.42c2.14,0,3.87-1.18,3.87-2.62v-68.16h-12.16v68.16c0,1.45,1.73,2.62,3.87,2.62Z" fill="#fff"/>
-  <path d="M364.77,317.12c2.14,0,3.87-1.18,3.87-2.62v-68.16h-7.74v68.16c0,1.45,1.74,2.62,3.87,2.62Z" fill="#fff"/>
-  <path d="M382.17,317.12c1.07,0,2.03-.3,2.74-.77.69-.47,1.13-1.13,1.13-1.85v-68.16h-7.74v68.16c то,1.45,1.74,2.62,3.87,2.62Z" fill="#fff"/>
-
-            </svg>
+            <!-- กล้อง -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4h10l2 3h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3Zm5 13a4 4 0 1 0 0-8a4 4 0 0 0 0 8Z"/></svg>
           </button>
         </div>
 
-        <div class="actions"><button id="btn-ok" class="btn btn-primary" disabled>ยืนยัน</button></div>
-        <div class="actions"><button id="btn-skip" class="btn btn-ghost">ข้าม (ไม่ทราบบาร์โค้ด)</button></div>
+        <div class="actions"><button id="btn-ok" class="btn btn-primary" type="button" disabled>ยืนยัน</button></div>
+        <div class="actions"><button id="btn-skip" class="btn btn-ghost" type="button">ข้าม (ไม่ทราบบาร์โค้ด)</button></div>
 
         <p id="bc-msg" class="msg" role="alert" aria-live="polite"></p>
       </section>
@@ -160,7 +139,7 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
 
   <footer>© 2024 Eazy Care by Boxbillion Co., Ltd. All Rights Reserved.</footer>
 
-  <!-- Popup สแกน -->
+  <!-- ===== Popup สแกน (เหมือนหน้าเว็บ) ===== -->
   <div id="lscan-overlay" aria-hidden="true">
     <div id="lscan-box" role="dialog" aria-modal="true" aria-labelledby="lscan-title">
       <div class="lscan-toolbar">
@@ -184,23 +163,20 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
 
       <div class="lscan-controls">
         <div class="lscan-grid">
-          <!-- การ์ด + input file ซ้อนทับ (opacity:0) -->
-          <div class="ec-card" role="button" aria-label="ถ่ายภาพ">
+          <!-- การ์ด + input file ซ้อนทับ -->
+          <div class="ec-card" id="lscan-usecam" role="button" aria-label="ถ่ายภาพ">
             <span class="ec-ico" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.71 452.51">
-                <path d="M746,345.06H662l-17-48.4c-4.82-13.71-18.81-22.92-34.84-22.92H451.79c-16,0-30,9.21-34.83,22.92l-17,48.4H254a54.94,54.94,0,0,0-54.88,54.88V671.38A54.94,54.94,0,0,0,254,726.26H746a54.93,54.93,0,0,0,54.87-54.88V399.94A54.93,54.93,0,0,0,746,345.06ZM295.82,466.51a31.45,31.45,0,1,1,31.46-31.45A31.45,31.45,0,0,1,295.82,466.51Zm328,162a131.44,131.44,0,0,1-185.67,0C387,577.3,387,494,438.16,442.83s134.48-51.19,185.67,0A131.41,131.41,0,0,1,623.83,628.49Z" transform="translate(-199.15 -273.74)" fill="#91c65e"/>
-                <circle cx="331.86" cy="261.91" r="103.64" fill="#91c65e"/>
-              </svg>
+              <!-- ไอคอนกล้อง -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.71 452.51"><path d="M746,345.06H662l-17-48.4c-4.82-13.71-18.81-22.92-34.84-22.92H451.79c-16,0-30,9.21-34.83,22.92l-17,48.4H254a54.94,54.94,0,0,0-54.88,54.88V671.38A54.94,54.94,0,0,0,254,726.26H746a54.93,54.93,0,0,0,54.87-54.88V399.94A54.93,54.93,0,0,0,746,345.06ZM295.82,466.51a31.45,31.45,0,1,1,31.46-31.45A31.45,31.45,0,0,1,295.82,466.51Zm328,162a131.44,131.44,0,0,1-185.67,0C387,577.3,387,494,438.16,442.83s134.48-51.19,185.67,0A131.41,131.41,0,0,1,623.83,628.49Z" transform="translate(-199.15 -273.74)" fill="#91c65e"/><circle cx="331.86" cy="261.91" r="103.64" fill="#91c65e"/></svg>
             </span>
             <span class="ec-sub">ถ่ายภาพ</span>
             <input id="lscan-filecam" class="file-overlay" type="file" accept="image/*" capture="environment" />
           </div>
 
-          <div class="ec-card" role="button" aria-label="แนบรูปภาพ">
+          <div class="ec-card" id="lscan-pick" role="button" aria-label="แนบรูปภาพ">
             <span class="ec-ico" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655.8 451.39">
-                <path d="M620-1H34.2C15.3-1,0,14.3,0,33.1v415c0,18.8,15.3,34.2,34.2,34.2h585.9c18.8,0,34.2-15.3,34.2-34.2V33.1c0-18.8-15.3-34.2-34.2-34.2ZM137.9,76.5c30.7,0,55.6,24.9,55.6,55.6s-24.9,55.6-55.6,55.6-55.6-24.9-55.6-55.6,24.9-55.6,55.6-55.6ZM602.1,430.2H52.1v-54.3l186.1-143.1c7.4-5.7,17.8-5,24.4,1.6l51.9,51.9c7.2,7.2,19,7.2,26.2,0l111.6-111.6c7.2-7.2,19-7.2,26.2,0l123.5,123.5v132Z" fill="#91c65e"/>
-              </svg>
+              <!-- ไอคอนรูปภาพ -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655.8 451.39"><path d="M620-1H34.2C15.3-1,0,14.3,0,33.1v415c0,18.8,15.3,34.2,34.2,34.2h585.9c18.8,0,34.2-15.3,34.2-34.2V33.1c0-18.8-15.3-34.2-34.2-34.2ZM137.9,76.5c30.7,0,55.6,24.9,55.6,55.6s-24.9,55.6-55.6,55.6-55.6-24.9-55.6-55.6,24.9-55.6,55.6-55.6ZM602.1,430.2H52.1v-54.3l186.1-143.1c7.4-5.7,17.8-5,24.4,1.6l51.9,51.9c7.2,7.2,19,7.2,26.2,0l111.6-111.6c7.2-7.2,19-7.2,26.2,0l123.5,123.5v132Z" fill="#91c65e"/></svg>
             </span>
             <span class="ec-sub">แนบรูปภาพ</span>
             <input id="lscan-file" class="file-overlay" type="file" accept="image/*" />
@@ -213,18 +189,22 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
   <script>
   (async function(){
     'use strict';
-    const LIFF_ID       = '2008100293-1xx32BzA';
+    /* ===== ค่าพื้นฐาน ===== */
+    const LIFF_ID       = '2008100293-1xx32BzA'; // <- ใช้ของจริงของคุณ
     const WP_ORIGIN     = 'https://www.eazycare.in.th';
     const REGISTER_URL  = WP_ORIGIN + '/การรับประกัน/';
     const API_URL       = WP_ORIGIN + '/wp-json/eazycare/v1/product-lookup?code=';
 
+    /* ===== DOM ===== */
     const $ = (s,r=document)=>r.querySelector(s);
     const elPrefix=$('#bc-prefix'), elTail3=$('#bc-tail'), elMsg=$('#bc-msg');
     const btnOk=$('#btn-ok'), btnSkip=$('#btn-skip'), btnScan=$('#bc-scan');
-    const BARCODE_PREFIX=elPrefix.value||'8851003738';
-    const onlyDigits=v=>(v||'').replace(/\D+/g,'');
-    const setMsg=(t,ok)=>{elMsg.className='msg '+(ok?'ok':'err');elMsg.textContent=t||'';};
 
+    const BARCODE_PREFIX=elPrefix?.value||'8851003738';
+    const onlyDigits=v=>(v||'').replace(/\D+/g,'');
+    const setMsg=(t,ok)=>{ elMsg.className='msg '+(ok?'ok':'err'); elMsg.textContent=t||''; };
+
+    /* ===== LIFF Login (คงเดิม) ===== */
     let ecUser=null, idToken=null;
     try{
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser:true });
@@ -254,121 +234,140 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
       return res.json();
     }
 
+    /* ===== พฤติกรรมฟิลด์ (เหมือนหน้าเว็บ) ===== */
     function onInput(){
       let d=onlyDigits(elTail3.value);
       if(d.length>3) d=d.slice(-3);
       elTail3.value=d;
-      btnOk.disabled=(d.length!==3);
       setMsg('',true);
+      btnOk.disabled=(d.length!==3);
     }
-    elTail3.addEventListener('input',onInput);
-    elTail3.addEventListener('keyup',e=>{if(e.key==='Enter'&&!btnOk.disabled)btnOk.click();});
+    elTail3.addEventListener('input', onInput);
+    elTail3.addEventListener('paste', ()=> requestAnimationFrame(onInput));
+    elTail3.addEventListener('keyup', e => { if (e.key === 'Enter' && !btnOk.disabled) btnOk.click(); });
     onInput();
 
-    btnOk.addEventListener('click',async()=>{
-      const tail3=onlyDigits(elTail3.value);
-      if(tail3.length!==3){setMsg('ต้องกรอกให้ครบ 3 หลัก',false);return;}
-      const full13=BARCODE_PREFIX+tail3;
-      btnOk.disabled=true;
+    /* ===== ยืนยัน (เหมือนหน้าเว็บ) ===== */
+    btnOk.addEventListener('click', async ()=>{
+      const tail3 = onlyDigits(elTail3.value);
+      if (tail3.length !== 3){ setMsg('ต้องกรอกให้ครบ 3 หลัก', false); elTail3.focus(); return; }
+      const fullCode13 = BARCODE_PREFIX + tail3;
+      btnOk.disabled = true;
 
-      const steps=[
-        {t:'กำลังตรวจสอบบาร์โค้ด...',ms:0},
-        {t:'กำลังดึงข้อมูลระบบสินค้า...',ms:1200},
-        {t:'กำลังตรวจสอบสินค้า...',ms:2400}
+      const msgSteps = [
+        { text: 'กำลังตรวจสอบบาร์โค้ด...', delay: 0 },
+        { text: 'กำลังดึงข้อมูลระบบสินค้า...', delay: 2000 },
+        { text: 'กำลังตรวจสอบสินค้า...', delay: 3000 }
       ];
-      steps.forEach(s=>setTimeout(()=>setMsg(s.t,true),s.ms));
+      msgSteps.forEach(step=>{ setTimeout(()=> setMsg(step.text, true), step.delay); });
 
       try{
-        const data=await lookup(full13);
-        if(data && data.ok && !data.not_found && data.product_name){
-          setTimeout(()=>{setMsg('พบสินค้าแล้ว: '+data.product_name,true);},3600);
-          const payload={ product:{ product_name:data.product_name, category_base:data.category_base||'', system:data.system||'', category:data.category||'' }, ...(ecUser?{user:ecUser}:{}) };
-          const ecp=b64urlEncodeJson(payload);
-          const registerUrl=new URL(REGISTER_URL); registerUrl.searchParams.set('ecp',ecp);
+        const data = await lookup(fullCode13);
+        if (data && data.ok && !data.not_found && data.product_name){
+          setTimeout(()=>{ setMsg('พบสินค้าแล้ว: ' + data.product_name, true); }, 2000);
+          const payload = {
+            product:{
+              product_name:data.product_name,
+              category_base:data.category_base||'',
+              system:data.system||'',
+              category:data.category||''
+            },
+            ...(ecUser?{user:ecUser}:{})
+          };
+          const ecp = b64urlEncodeJson(payload);
+          const registerUrl = new URL(REGISTER_URL); registerUrl.searchParams.set('ecp', ecp);
 
-          if(idToken){ const ssoUrl = buildSsoUrl(idToken, registerUrl.toString()); setTimeout(()=>{ location.href = ssoUrl; }, 4200); }
-          else{ setTimeout(()=>{ location.href = registerUrl.toString(); }, 4200); }
+          setTimeout(()=>{
+            if(idToken){ location.href = buildSsoUrl(idToken, registerUrl.toString()); }
+            else{ location.href = registerUrl.toString(); }
+          }, 4000);
         }else{
-          setTimeout(()=>{setMsg('ไม่พบสินค้า โปรดลองสแกนใหม่ หรือกด “ข้าม”',false);btnOk.disabled=false;},3200);
+          setTimeout(()=>{ setMsg('ไม่พบสินค้าในระบบ โปรดลองสแกนใหม่ หรือกดข้าม', false); btnOk.disabled=false; }, 3000);
         }
       }catch(e){
         console.error(e);
-        setTimeout(()=>{setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่ หรือกด “ข้าม”',false);btnOk.disabled=false;},3000);
+        setTimeout(()=>{ setMsg('ระบบไม่พร้อมใช้งาน กรุณาลองใหม่หรือกดข้าม', false); btnOk.disabled=false; }, 3000);
       }
     });
 
-    btnSkip.addEventListener('click',()=>{
+    /* ===== ข้าม ===== */
+    btnSkip.addEventListener('click', ()=>{
       const registerUrl=new URL(REGISTER_URL);
       if(ecUser){ const ecp=b64urlEncodeJson({user:ecUser}); registerUrl.searchParams.set('ecp',ecp); }
-      if(idToken){ const ssoUrl = buildSsoUrl(idToken, registerUrl.toString()); location.href = ssoUrl; }
+      if(idToken){ location.href = buildSsoUrl(idToken, registerUrl.toString()); }
       else{ location.href = registerUrl.toString(); }
     });
 
-    // ===== Scan overlay =====
+    /* ===== สแกน (overlay) ===== */
     const ovl = $('#lscan-overlay');
     const btnClose = $('#lscan-close');
     const fileCam   = $('#lscan-filecam');
     const file      = $('#lscan-file');
 
-    btnScan.addEventListener('click', ()=>{ 
-      ovl.classList.add('show'); 
-      ovl.setAttribute('aria-hidden','false'); 
-      // เริ่มสแกนสด ถ้า Quagga ใช้งานได้ (ต้อง HTTPS และอนุญาตกล้อง)
-      if (typeof Quagga !== 'undefined') {
-        startScanner().catch(e=>setMsg('ไม่สามารถเริ่มสแกนได้: '+e,false));
-      } else {
-        setMsg('ตัวสแกนสดไม่พร้อม ใช้ “ถ่ายภาพ/แนบรูปภาพ” แทนได้', false);
+    function showOverlay(){
+      ovl.classList.add('show');
+      ovl.setAttribute('aria-hidden','false');
+      if (typeof Quagga === 'undefined') {
+        setMsg('ตัวสแกนสดไม่พร้อม ใช้ปุ่ม “ถ่ายภาพ/แนบรูปภาพ” ได้', false);
+        return;
       }
-    });
+      startScanner().catch(e=>setMsg('ไม่สามารถเริ่มสแกนได้: '+e, false));
+    }
+    function hideOverlay(){
+      ovl.classList.remove('show');
+      ovl.setAttribute('aria-hidden','true');
+      setTimeout(()=>stopScanner().catch(()=>{}), 0);
+    }
+
+    btnScan.addEventListener('click', showOverlay);
     btnClose.addEventListener('click', hideOverlay);
     ovl.addEventListener('click', (e)=>{ if (e.target === ovl) hideOverlay(); });
     document.addEventListener('keydown', (e)=>{ if((e.key==='Escape'||e.key==='Esc') && ovl.classList.contains('show')) hideOverlay(); });
 
-    function hideOverlay(){
-      ovl.classList.remove('show');
-      ovl.setAttribute('aria-hidden','true');
-      setTimeout(()=>stopScanner().catch(()=>{}),0);
-    }
-
     function autoConfirm(){
-      const attempt=()=>{
+      const attempt = ()=>{
         if(elTail3.value.trim().length===3){
           btnOk.disabled=false;
           btnOk.click();
         }
       };
-      setTimeout(attempt,0);
-      setTimeout(attempt,120);
-      setTimeout(attempt,400);
+      setTimeout(attempt, 0);
+      setTimeout(attempt, 120);
+      setTimeout(attempt, 400);
     }
 
+    /* ===== Quagga เหมือนหน้าเว็บ ===== */
     const decoders = ["ean_reader","ean_8_reader","upc_reader","upc_e_reader","code_128_reader"];
-    let lastCode=null,lastTime=0;
+    let lastCode = null, lastTime = 0;
 
     function onDetected(result){
-      const now=Date.now();
-      const code=result?.codeResult?.code||'';
+      const now = Date.now();
+      const code = result?.codeResult?.code || '';
       if(!code) return;
       if(code===lastCode && (now-lastTime)<1000) return;
-      lastCode=code; lastTime=now;
+      lastCode = code; lastTime = now;
 
-      const tail3=(''+code).replace(/\D+/g,'').slice(-3);
+      const tail3 = (''+code).replace(/\D+/g,'').slice(-3);
       if(tail3.length===3){
-        elTail3.value=tail3; onInput();
+        elTail3.value = tail3; onInput();
         hideOverlay();
         autoConfirm();
-      }else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
+      }else{
+        setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
+      }
     }
 
-    function quaggaDecodeOnce(opts){ return new Promise(res=>Quagga.decodeSingle(opts,out=>res(out||null))); }
+    function quaggaDecodeOnce(opts){ return new Promise(res => Quagga.decodeSingle(opts, out => res(out||null))); }
     async function makeTransformedBlob(blob, maxW=1280, rotateDeg=0){
-      const bmp=await createImageBitmap(blob);
-      const swap=rotateDeg%180!==0;
-      const baseW=swap?bmp.height:bmp.width, baseH=swap?bmp.width:bmp.height;
-      const ratio=Math.min(1,maxW/baseW);
-      const w=Math.max(1,Math.round(baseW*ratio)), h=Math.max(1,Math.round(baseH*ratio));
-      const cvs=document.createElement('canvas'); cvs.width=w; cvs.height=h;
-      const ctx=cvs.getContext('2d',{alpha:false,desynchronized:true});
+      const bmp = await createImageBitmap(blob);
+      const swap = rotateDeg%180!==0;
+      const baseW = swap ? bmp.height : bmp.width;
+      const baseH = swap ? bmp.width  : bmp.height;
+      const ratio = Math.min(1, maxW/baseW);
+      const w = Math.max(1, Math.round(baseW*ratio));
+      const h = Math.max(1, Math.round(baseH*ratio));
+      const cvs = document.createElement('canvas'); cvs.width=w; cvs.height=h;
+      const ctx = cvs.getContext('2d',{alpha:false,desynchronized:true});
       if('filter' in ctx) ctx.filter='contrast(115%) brightness(105%)';
       ctx.save();
       if(rotateDeg===0){ ctx.drawImage(bmp,0,0,w,h); }
@@ -390,7 +389,7 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
       for(const ang of angles){
         const hi=await makeTransformedBlob(blob,1600,ang);
         const url=URL.createObjectURL(hi);
-        const r=await quaggaDecodeOnce({src=url,numOfWorkers:0,inputStream:{size:1600},locator:{patchSize:'large',halfSample:false},decoder:{readers},locate:true});
+        const r=await quaggaDecodeOnce({src:url,numOfWorkers:0,inputStream:{size:1600},locator:{patchSize:'large',halfSample:false},decoder:{readers},locate:true});
         URL.revokeObjectURL(url);
         if(r?.codeResult?.code) return r;
       }
@@ -426,39 +425,25 @@ position:absolute; right:6px; top:50%; transform:translateY(-50%);
       }catch(_){}
     }
 
-    // ===== เลือกรูป/ถ่ายภาพ =====
-    const file   = document.getElementById('lscan-file');
-    const fileCam= document.getElementById('lscan-filecam');
-
-    file.addEventListener('change', async ()=>{
-      const f=file.files?.[0]; if(!f) return;
+    /* ===== เลือกรูป/ถ่ายภาพ (เหมือนหน้าเว็บ) ===== */
+    function handlePickedFile(file){
+      if(!file) return;
       hideOverlay();
-      const readers=decoders.map(n=>({format:n,config:{}}));
-      try{
-        const result=await decodeBlobSmart(f, readers);
-        const code=result?.codeResult?.code||'';
-        const tail3=(''+code).replace(/\D+/g,'').slice(-3);
-        if(tail3.length===3){ elTail3.value=tail3; onInput(); autoConfirm(); }
-        else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
-      }catch(e){
-        setMsg('สแกนจากรูปไม่สำเร็จ โปรดลองใหม่ หรือกรอกเลข 3 หลักท้ายเอง', false);
-      }finally{ file.value=''; }
-    });
-
-    fileCam.addEventListener('change', async ()=>{
-      const f=fileCam.files?.[0]; if(!f) return;
-      hideOverlay();
-      const readers=decoders.map(n=>({format:n,config:{}}));
-      try{
-        const result=await decodeBlobSmart(f, readers);
-        const code=result?.codeResult?.code||'';
-        const tail3=(''+code).replace(/\D+/g,'').slice(-3);
-        if(tail3.length===3){ elTail3.value=tail3; onInput(); autoConfirm(); }
-        else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
-      }catch(e){
-        setMsg('สแกนจากรูปไม่สำเร็จ โปรดลองใหม่ หรือกรอกเลข 3 หลักท้ายเอง', false);
-      }finally{ fileCam.value=''; }
-    });
+      const readers = decoders.map(n=>({format:n,config:{}}));
+      (async()=>{
+        try{
+          const result = await decodeBlobSmart(file, readers);
+          const code = result?.codeResult?.code || '';
+          const tail3 = (''+code).replace(/\D+/g,'').slice(-3);
+          if(tail3.length===3){ elTail3.value=tail3; onInput(); autoConfirm(); }
+          else setMsg('ไม่พบบาร์โค้ด โปรดลองสแกนใหม่ หรือกรอกเลขด้วยตนเอง', false);
+        }catch(e){
+          setMsg('สแกนจากรูปไม่สำเร็จ โปรดลองใหม่ หรือกรอกเลข 3 หลักท้ายเอง', false);
+        }
+      })();
+    }
+    file.addEventListener('change', ()=>handlePickedFile(file.files?.[0]));
+    fileCam.addEventListener('change', ()=>handlePickedFile(fileCam.files?.[0]));
   })();
   </script>
 </body>
